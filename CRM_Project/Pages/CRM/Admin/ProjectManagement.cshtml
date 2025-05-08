@@ -1,0 +1,235 @@
+﻿@page
+@model CRM_Project.Pages.CRM.Admin.ProjectManagementModel
+@{
+    ViewData["Title"] = "Gestione Progetti";
+}
+
+<style>
+    html, body {
+        height: 100%;
+        overflow: auto;
+        background-color: var(--bg-color);
+        color: var(--text-color);
+    }
+
+    .form-select, .form-control {
+        background-color: var(--input-bg);
+        color: var(--text-color);
+        border: 1px solid var(--input-border);
+    }
+
+        .form-select:focus, .form-control:focus {
+            box-shadow: 0 0 0 0.2rem rgba(108, 92, 231, 0.25);
+        }
+
+        .form-control::placeholder {
+            color: var(--text-color);
+        }
+
+
+    .card {
+        background-color: var(--card-bg);
+        color: var(--text-color);
+        border: none;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+    }
+
+    .dashboard-header {
+        background: linear-gradient(135deg, #6c5ce7, #a29bfe);
+        color: white;
+        padding: 25px 0;
+        margin-bottom: 30px;
+        box-shadow: 0 4px 20px rgba(108, 92, 231, 0.3);
+    }
+
+    .btn-purple {
+        background-color: #6c5ce7;
+        color: white;
+    }
+
+        .btn-purple:hover {
+            background-color: #5a4bd8;
+        }
+
+    .project-card {
+        transition: transform 0.2s;
+    }
+
+        .project-card:hover {
+            transform: translateY(-5px);
+        }
+
+    .status-badge {
+        padding: 4px 8px;
+        border-radius: 12px;
+        font-size: 0.75rem;
+        font-weight: 500;
+    }
+
+    .status-pending {
+        background-color: #ffc107;
+        color: #212529;
+    }
+
+    .status-ongoing {
+        background-color: #0d6efd;
+        color: white;
+    }
+
+    .status-completed {
+        background-color: #198754;
+        color: white;
+    }
+
+    .empty-state {
+        min-height: 300px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .bg-purple {
+        background-color: #6c5ce7 !important;
+    }
+
+</style>
+
+<div class="dashboard-header">
+    <div class="container">
+        <div class="d-flex justify-content-between align-items-center">
+            <div>
+                <h1><i class="fas fa-project-diagram me-2"></i> Gestione Progetti</h1>
+                <p class="mb-0">Panoramica e gestione di tutti i progetti</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="container my-4">
+    <div class="d-flex justify-content-between mb-3">
+        <div class="input-group w-50">
+            <span class="input-group-text bg-purple text-white"><i class="fas fa-search"></i></span>
+            <input type="text" id="searchInput" class="form-control" placeholder="Cerca progetti...">
+        </div>
+        <div>
+            <a href="ProjectManagmentF/AddProject" class="btn btn-purple">
+                <i class="fas fa-plus me-2"></i> Aggiungi Progetto
+            </a>
+        </div>
+    </div>
+
+    <div id="projectContainer" class="row g-4">
+        <!-- Projects will be loaded here -->
+    </div>
+</div>
+
+<script>
+    // Function to get status badge class
+    function getStatusClass(status) {
+        if (!status) return 'status-pending';
+        switch(status.toLowerCase()) {
+            case 'pending': return 'status-pending';
+            case 'ongoing': return 'status-ongoing';
+            case 'completed': return 'status-completed';
+            default: return 'status-pending';
+        }
+    }
+
+    // Function to render projects
+    function renderProjects(projects) {
+        const container = document.getElementById("projectContainer");
+
+        if (!projects || projects.length === 0) {
+            container.innerHTML = `
+                <div class="col-12 empty-state">
+                    <i class="fas fa-folder-open fa-3x mb-3 "></i>
+                    <h5>Nessun progetto trovato</h5>
+                    <p >Aggiungi un nuovo progetto per iniziare</p>
+                </div>
+            `;
+            return;
+        }
+
+        container.innerHTML = projects.map((project, index) => `
+            <div class="col-md-4">
+                <div class="card project-card h-100">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-start mb-2">
+                            <h5 class="card-title mb-0">${project.name}</h5>
+    <span class="status-badge ${getStatusClass(project.status)}">${
+        project.status === "Pending" ? "In attesa" :
+        project.status === "Ongoing" ? "In corso" :
+        project.status === "Completed" ? "Completato" : "Sconosciuto"
+    }</span>
+                            </div>
+                        <p class="card-text"><small >Scadenza: ${project.deadline}</small></p>
+                        <small> Descrizione  : </small>
+                        <p class="card-text">${project.description}</p>
+                        <div class="mb-2">
+                            <small>Team Leader:</small>
+                            <p class="mb-1">${project.teamLeader || 'N/D'}</p>
+                        </div>
+                        <div class="mb-2">
+                            <small>Membri del Team:</small>
+                            <p class="mb-1">${project.teamMembers ? project.teamMembers.join(", ") : 'N/D'}</p>
+                        </div>
+                        <div class="mb-3">
+                            <small >Cliente:</small>
+                            <p class="mb-1">${project.client || 'N/D'}</p>
+                        </div>
+                        <div class="d-flex justify-content-between ">
+    <a class="btn btn-outline-warning" href="ProjectManagmentF/EditProject?name=${encodeURIComponent(project.name)}&deadline=${project.deadline}&status=${project.status}&description=${encodeURIComponent(project.description)}&teamLeader=${encodeURIComponent(project.teamLeader || '')}&teamMembers=${encodeURIComponent(project.teamMembers ? project.teamMembers.join(",") : '')}&client=${encodeURIComponent(project.client || '')}"                               class="btn btn-sm btn-outline-purple">
+                                <i class="fas fa-edit"></i> Modifica
+                            </a>
+                            <button class="btn btn-sm btn-outline-danger" onclick="deleteProject(${index})">
+                                <i class="fas fa-trash"></i> Elimina
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `).join("");
+    }
+
+    // Function to delete project
+    function deleteProject(index) {
+        if (confirm("Sei sicuro di voler eliminare questo progetto?")) {
+            const projects = JSON.parse(localStorage.getItem("projects")) || [];
+            projects.splice(index, 1);
+            localStorage.setItem("projects", JSON.stringify(projects));
+            loadProjects();
+        }
+    }
+
+    // Function to load and filter projects
+    function loadProjects() {
+        const projects = JSON.parse(localStorage.getItem("projects")) || [];
+        const searchTerm = document.getElementById("searchInput").value.toLowerCase();
+
+        const filteredProjects = projects.filter(project =>
+            project.name.toLowerCase().includes(searchTerm) ||
+            (project.description && project.description.toLowerCase().includes(searchTerm)) ||
+            (project.client && project.client.toLowerCase().includes(searchTerm)) ||
+            (project.teamLeader && project.teamLeader.toLowerCase().includes(searchTerm))
+        );
+
+        renderProjects(filteredProjects);
+    }
+
+    // Initialize when page loads
+    document.addEventListener("DOMContentLoaded", function() {
+        // Load initial projects
+        loadProjects();
+
+        // Setup search functionality
+        document.getElementById("searchInput").addEventListener("input", loadProjects);
+
+        // Check for new project added
+        const urlParams = new URLSearchParams(window.location.search);
+        if (urlParams.has('new')) {
+            // Scroll to top and highlight new project
+            window.scrollTo(0, 0);
+        }
+    });
+</script>

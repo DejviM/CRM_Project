@@ -1,0 +1,239 @@
+﻿@page
+@model CRM_Project.Pages.CRM.Admin.Task_Management_F.EditTaskModel
+@{
+    ViewData["Title"] = "Modifica Attività";
+}
+
+<style>
+    html, body {
+        height: 100%;
+        overflow: auto;
+        background-color: var(--bg-color);
+        color: var(--text-color);
+    }
+
+    .compact-form-container {
+        max-width: 600px;
+        margin: 2rem auto;
+        padding: 1.5rem;
+        background-color: var(--card-bg);
+        border-radius: 8px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    }
+
+    .compact-form-group {
+        margin-bottom: 0.75rem;
+    }
+
+    .compact-form-label {
+        font-size: 0.85rem;
+        margin-bottom: 0.25rem;
+        display: block;
+        color: var(--text-color);
+    }
+
+    .compact-form-control {
+        padding: 0.35rem 0.5rem;
+        font-size: 0.85rem;
+        height: calc(1.5em + 0.5rem + 2px);
+        width: 50%;
+        background-color: var(--input-bg);
+        color: var(--input-text);
+        border: 1px solid var(--input-border);
+        border-radius: 4px;
+    }
+
+    .compact-form-select {
+        padding: 0.35rem 0.5rem;
+        font-size: 0.85rem;
+        height: calc(1.5em + 0.5rem + 2px);
+        background-color: var(--input-bg);
+        color: var(--input-text);
+        border: 1px solid var(--input-border);
+        border-radius: 4px;
+    }
+
+    .compact-textarea {
+        min-height: 60px;
+        min-width: 100%;
+        padding: 0.5rem;
+        font-size: 0.85rem;
+        background-color: var(--input-bg);
+        color: var(--input-text);
+        border: 1px solid var(--input-border);
+        border-radius: 4px;
+    }
+
+    .compact-btn {
+        padding: 0.35rem 1rem;
+        font-size: 0.85rem;
+        background-color: #6c5ce7;
+        color: white;
+        border: none;
+        border-radius: 4px;
+    }
+
+        .compact-btn:hover {
+            background-color: #5a4bd8;
+        }
+
+    .form-title {
+        font-size: 1.25rem;
+        margin-bottom: 1.5rem;
+        text-align: center;
+        color: var(--text-color);
+    }
+</style>
+
+<div class="container">
+    <div class="compact-form-container">
+        <h5 class="form-title"><i class="fas fa-edit me-2"></i>Modifica Attività</h5>
+
+        <form id="editTaskForm">
+            <div class="compact-form-group">
+                <label class="compact-form-label">Nome Attività *</label>
+                <input type="text" class="compact-form-control" id="taskName" required>
+            </div>
+
+            <div class="compact-form-group">
+                <label class="compact-form-label">Descrizione</label>
+                <textarea class="compact-textarea" id="taskDescription"></textarea>
+            </div>
+
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="compact-form-group">
+                        <label class="compact-form-label">Progetto *</label>
+                        <select class="compact-form-select" id="taskProject" required>
+                            <option value="" selected disabled>Seleziona Progetto</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="compact-form-group">
+                        <label class="compact-form-label">Priorità *</label>
+                        <select class="compact-form-select" id="taskPriority" required>
+                            <option value="Alta">Alta</option>
+                            <option value="Media">Media</option>
+                            <option value="Bassa">Bassa</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="compact-form-group">
+                        <label class="compact-form-label">Lavoratore Assegnato *</label>
+                        <select class="compact-form-select" id="taskWorker" required>
+                            <option value="" selected disabled>Seleziona Lavoratore</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="compact-form-group">
+                        <label class="compact-form-label">Scadenza *</label>
+                        <input type="date" class="compact-form-control" id="taskDeadline" required>
+                    </div>
+                </div>
+            </div>
+
+            <div class="compact-form-group">
+                <label class="compact-form-label">Stato *</label>
+                <select class="compact-form-select" id="taskStatus" required>
+                    <option value="Pending">In attesa</option>
+                    <option value="In Progress">In corso</option>
+                    <option value="Completed">Completato</option>
+                </select>
+            </div>
+
+            <div class="d-grid gap-2 mt-4">
+                <button type="submit" class="compact-btn">
+                    <i class="fas fa-save me-1"></i> Salva Modifiche
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const urlParams = new URLSearchParams(window.location.search);
+        const taskIndex = parseInt(urlParams.get("index"));
+        const tasks = JSON.parse(localStorage.getItem("tasks")) || [];
+        const task = tasks[taskIndex];
+
+        if (!task) {
+            alert("Attività non trovata.");
+            window.location.href = "/CRM/Admin/taskMenagment";
+            return;
+        }
+
+        // Get projects from localStorage
+        const projects = JSON.parse(localStorage.getItem("projects")) || [];
+        const taskProjectDropdown = document.getElementById("taskProject");
+
+        // Add projects to dropdown
+        projects.forEach(project => {
+            const option = document.createElement("option");
+            option.value = project.name;
+            option.textContent = project.name;
+            taskProjectDropdown.appendChild(option);
+        });
+
+        // Get workers from users with role 'worker'
+        const users = JSON.parse(localStorage.getItem("users")) || [];
+        const workers = users.filter(user => user.Ruolo && user.Ruolo.toLowerCase() === "worker");
+        const taskWorkerDropdown = document.getElementById("taskWorker");
+
+        // Add workers to dropdown
+        workers.forEach(worker => {
+            const option = document.createElement("option");
+            option.value = `${worker.Nome} ${worker.Cognome}`;
+            option.textContent = `${worker.Nome} ${worker.Cognome}`;
+            taskWorkerDropdown.appendChild(option);
+        });
+
+        // Pre-fill form fields
+        document.getElementById("taskName").value = task.title || "";
+        document.getElementById("taskDescription").value = task.description || "";
+        taskProjectDropdown.value = task.project || "";
+        taskWorkerDropdown.value = task.worker || "";
+        document.getElementById("taskPriority").value = task.priority || "Media";
+        document.getElementById("taskDeadline").value = task.dueDate || "";
+        document.getElementById("taskStatus").value = task.status || "Pending";
+
+        document.getElementById("editTaskForm").addEventListener("submit", function(e) {
+            e.preventDefault();
+
+            const name = document.getElementById("taskName").value.trim();
+            const description = document.getElementById("taskDescription").value.trim();
+            const project = document.getElementById("taskProject").value;
+            const worker = document.getElementById("taskWorker").value;
+            const priority = document.getElementById("taskPriority").value;
+            const deadline = document.getElementById("taskDeadline").value;
+            const status = document.getElementById("taskStatus").value;
+
+            if (!name || !project || !worker || !deadline || !status) {
+                alert("Per favore, compila tutti i campi obbligatori (*).");
+                return;
+            }
+
+            // Update the task
+            tasks[taskIndex] = {
+                ...task,
+                title: name,
+                description: description,
+                project: project,
+                worker: worker,
+                priority: priority,
+                dueDate: deadline,
+                status: status,
+                updatedAt: new Date().toISOString()
+            };
+
+            localStorage.setItem("tasks", JSON.stringify(tasks));
+            window.location.href = "/CRM/Admin/taskMenagment";
+        });
+    });
+</script>

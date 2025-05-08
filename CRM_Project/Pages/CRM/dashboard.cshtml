@@ -1,0 +1,1192 @@
+﻿@page
+@model CRM_Project.Pages.CRM.IndexModel
+@{
+    ViewData["Title"] = "Dashboard";
+}
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>@ViewData["Title"]</title>
+
+    <style>
+        :root {
+            /* Light theme colors */
+            --primary-color: #6c5ce7;
+            --secondary-color: #a29bfe;
+            --success-color: #00b894;
+            --info-color: #0984e3;
+            --danger-color: #d63031;
+            --warning-color: #fdcb6e;
+            --bg-color: #f5f7fb;
+            --text-color: #2d3436;
+            --card-bg: #ffffff;
+            --muted-text: #636e72;
+            --input-bg: #ffffff;
+            --input-text: #2d3436;
+            --input-border: #dfe6e9;
+            --input-placeholder: #b2bec3;
+            --table-header-bg: #6c5ce7;
+            --table-bg: #ffffff;
+            --table-border-color: #dfe6e9;
+            --table-text-color: #2d3436;
+            --badge-working-bg: #00e67620;
+            --badge-working-color: #00e676;
+            --badge-dayoff-bg: #ff525220;
+            --badge-dayoff-color: #ff5252;
+            --hover-bg: rgba(108, 92, 231, 0.1);
+            --dropdown-bg: #ffffff;
+            --dropdown-text: #2d3436;
+            --dropdown-hover-bg: #eeeeee;
+            --today-bg: linear-gradient(90deg, #f1e6ff, #e3d1ff);
+            --today-shadow: inset 0 0 8px #b388ff;
+            --modal-bg: #ffffff;
+            --modal-text-color: #2d3436;
+        }
+
+        body.dark-mode {
+            /* Dark theme colors */
+            --bg-color: #1a1a2e;
+            --text-color: #f5f5f5;
+            --card-bg: rgba(255, 255, 255, 0.08);
+            --muted-text: #ccc;
+            --input-bg: #2a2a40;
+            --input-text: #ffffff;
+            --input-border: #444;
+            --input-placeholder: #777;
+            --table-header-bg: #32174d;
+            --table-bg: #1b1b1b;
+            --table-border-color: #2e003e;
+            --table-text-color: #e0e0e0;
+            --badge-working-bg: #00e67630;
+            --badge-working-color: #00e676;
+            --badge-dayoff-bg: #ff525230;
+            --badge-dayoff-color: #ff5252;
+            --hover-bg: rgba(108, 92, 231, 0.2);
+            --dropdown-bg: #1f1f1f;
+            --dropdown-text: #ffffff;
+            --dropdown-hover-bg: #343a40;
+            --today-bg: linear-gradient(90deg, #2c003e, #19002c);
+            --today-shadow: inset 0 0 8px #9a4dff;
+            --modal-bg: #1f1f1f;
+            --modal-text-color: #ffffff;
+        }
+
+        /* General Layout */
+        html, body {
+            height: 100%;
+            overflow: auto;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            transition: background-color 0.3s ease, color 0.3s ease;
+        }
+
+        /* Header Styles */
+        .dashboard-header {
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            color: white;
+            padding: 25px 0;
+            margin-bottom: 30px;
+            box-shadow: 0 4px 20px rgba(108, 92, 231, 0.3);
+        }
+
+        /* Card Styles */
+        .card {
+            background-color: var(--card-bg);
+            color: var(--text-color);
+            border: none;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+            transition: all 0.3s ease;
+        }
+
+        .card-analytics, .stat-card, .card-light {
+            background-color: var(--card-bg);
+            border: none;
+            border-radius: 12px;
+            box-shadow: 0 6px 15px rgba(0, 0, 0, 0.05);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            padding: 20px;
+            color: var(--text-color);
+        }
+
+            .card-analytics .card-body {
+                padding: 25px;
+            }
+
+            .card-analytics .card-title, .stat-card .stat-title {
+                font-size: 1rem;
+                font-weight: 600;
+                color: var(--muted-text);
+                margin-bottom: 15px;
+            }
+
+            .card-analytics .card-value, .stat-card .stat-value {
+                font-size: 1.8rem;
+                font-weight: 700;
+                color: var(--text-color);
+            }
+
+        .card-icon {
+            font-size: 2.5rem;
+            opacity: 0.2;
+            position: absolute;
+            right: 20px;
+            top: 20px;
+            transition: opacity 0.3s ease;
+        }
+
+        .card-analytics:hover .card-icon {
+            opacity: 1;
+        }
+
+        .stat-card .stat-change {
+            font-size: 0.85rem;
+            margin-top: 5px;
+        }
+
+            .stat-card .stat-change.positive {
+                color: var(--success-color);
+            }
+
+            .stat-card .stat-change.negative {
+                color: var(--danger-color);
+            }
+
+        /* Table Styles */
+        .table-custom {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0;
+            background-color: var(--table-bg);
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 0 0 1px var(--table-header-bg);
+        }
+
+            .table-custom th {
+                background-color: var(--table-header-bg);
+                color: white;
+                text-align: left;
+                padding: 16px 18px;
+                font-size: 15px;
+            }
+
+            .table-custom td {
+                padding: 14px 18px;
+                border-top: 1px solid var(--table-border-color);
+                color: var(--table-text-color);
+                font-size: 14px;
+            }
+
+            .table-custom tr:last-child td {
+                border-bottom: none;
+            }
+
+        .table-admin th {
+            background-color: var(--table-header-bg);
+            color: white;
+        }
+
+        .table-admin td {
+            background-color: var(--table-bg);
+            color: var(--table-text-color);
+            border-color: var(--table-border-color);
+        }
+
+        /* Badge Styles */
+        .working-custom {
+            background-color: var(--badge-working-bg);
+            color: var(--badge-working-color);
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-weight: bold;
+            display: inline-block;
+        }
+
+        .day-off-custom {
+            background-color: var(--badge-dayoff-bg);
+            color: var(--badge-dayoff-color);
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-weight: bold;
+            display: inline-block;
+        }
+
+        .today-custom {
+            background: var(--today-bg);
+            box-shadow: var(--today-shadow);
+        }
+
+        /* Dropdown Styles */
+        .dropdown-menu {
+            display: none;
+            position: absolute;
+            z-index: 10;
+            background-color: var(--dropdown-bg);
+            border: 1px solid #444;
+            border-radius: 0.25rem;
+        }
+
+            .dropdown-menu .dropdown-item {
+                color: var(--dropdown-text);
+            }
+
+        .dropdown-item:hover {
+            background-color: var(--dropdown-hover-bg);
+            color: var(--text-color);
+        }
+
+        /* Dashboard Container */
+        .dashboard-container {
+            padding: 40px 20px;
+        }
+
+        /* Profile Card */
+        .profile-card {
+            background-color: var(--card-bg);
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+            color: var(--text-color);
+        }
+
+        .info-label {
+            font-weight: bold;
+            color: var(--muted-text);
+        }
+
+        /* Project Card */
+        .project-card {
+            background-color: var(--card-bg);
+            border-left: 5px solid var(--primary-color);
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 15px;
+            cursor: pointer;
+            transition: 0.3s;
+            color: var(--text-color);
+        }
+
+            .project-card:hover {
+                background-color: var(--hover-bg);
+            }
+
+        /* Section Title */
+        .section-title {
+            font-size: 1.3rem;
+            margin-bottom: 20px;
+            font-weight: 600;
+            color: var(--text-color);
+        }
+
+        /* Buttons */
+        .btn-purple {
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+        }
+
+            .btn-purple:hover {
+                background-color: #5a4edc;
+            }
+
+        /* Miscellaneous */
+        .hover-shadow:hover {
+            transform: scale(1.02);
+            transition: all 0.2s ease-in-out;
+            box-shadow: 0 0 15px rgba(255, 255, 255, 0.2);
+        }
+
+        .container-custom {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(12px);
+            border-radius: 16px;
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            padding: 30px;
+            max-width: 900px;
+            margin: 0 auto;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.4);
+        }
+
+        h2.heading-custom {
+            text-align: center;
+            color: #b388ff;
+            font-weight: 600;
+            font-size: 24px;
+            margin-bottom: 25px;
+            letter-spacing: 1px;
+        }
+
+        /* Navigation */
+        .nav-pills .nav-link.active {
+            background-color: var(--primary-color);
+        }
+
+        .nav-pills .nav-link {
+            color: var(--muted-text);
+            font-weight: 500;
+        }
+
+        /* Role-specific visibility */
+        .admin-only, .worker-only, .client-only, .user-only {
+            display: none;
+        }
+
+        .admin-notes-list {
+            background-color: var(--card-bg);
+            color: var(--text-color);
+            border-radius: 0 0 0.25rem 0.25rem;
+        }
+
+            .admin-notes-list .list-group-item {
+                background-color: transparent; /* Inherit from parent or look seamless */
+                color: var(--text-color);
+                border-color: var(--input-border); /* Optional */
+            }
+
+    </style>
+</head>
+<body>
+    <!-- Admin Header -->
+    <div class="dashboard-header admin-only">
+        <div class="container">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h1><i class="fas fa-user-shield me-2"></i> Pannello Amministratore</h1>
+                    <p class="mb-0">Accesso completo al sistema e controlli</p>
+                </div>
+                <div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Worker Header -->
+    <div class="dashboard-header worker-only">
+        <div class="container">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h1><i class="fas fa-user-tie me-2"></i> Dashboard Lavoratore</h1>
+                    <p class="mb-0">Gestisci i tuoi task e progetti</p>
+                </div>
+                <div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Client Header -->
+    <div class="dashboard-header client-only">
+        <div class="container">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h1><i class="fas fa-user-check me-2"></i> Dashboard Cliente</h1>
+                    <p class="mb-0">Monitora i tuoi progetti e comunicazioni</p>
+                </div>
+                <div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- User Header -->
+    <div class="dashboard-header user-only">
+        <div class="container">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h1><i class="fas fa-user me-2"></i> Dashboard Utente</h1>
+                    <p class="mb-0">Benvenuto nel portale CRM</p>
+                </div>
+                <div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ADMIN DASHBOARD -->
+    <div class="container mt-4 admin-only">
+        <!-- Quick Stats Row -->
+        <div class="row">
+            <!-- New Projects Card -->
+            <div class="col-xl-4 col-lg-6 mb-3">
+                <div class="card border-0 overflow-hidden fs-13px" style="min-height: 320px;">
+                    <div class="card-body position-relative">
+                        <div class="d-flex align-items-center mb-3">
+                            <div class="flex-grow-1">
+                                <h5 class="text-opacity-80 mb-0">NUOVI PROGETTI</h5>
+                                <h2 class="mt-1 mb-0"><span id="newProjectsCount">0</span></h2>
+                            </div>
+                            <div class="flex-shrink-0 ms-2">
+                                <div class="fs-28px px-2 py-1 fw-bold rounded-2">+15%</div>
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <i class="fa fa-info-circle"></i>
+                            <span class="ms-1">Progetti aggiunti questo mese</span>
+                        </div>
+                        <div class="progress mb-2 bg-light" style="height: 6px">
+                            <div class="progress-bar bg-orange" style="width: 37.5%"></div>
+                        </div>
+                        <div class="mb-4">
+                            <small>Crescita mensile progetti</small>
+                        </div>
+                        <div class="d-flex align-items-center">
+                            <div class="flex-grow-1">
+                                <div id="total-sales-sparkline" style="height: 60px;">
+                                    <canvas id="totalSalesChart" height="50"></canvas>
+                                </div>
+                            </div>
+                            <div class="flex-shrink-0 ms-3">
+                                <a href="/CRM/Admin/ProjectManagement" class="d-flex align-items-center text-decoration-none">
+                                    <i class="fa fa-chevron-right ms-1"></i>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Completed Tasks Card -->
+            <div class="col-xl-4 col-lg-6 mb-3">
+                <div class="card border-0 overflow-hidden fs-13px" style="min-height: 320px;">
+                    <div class="card-body position-relative">
+                        <div class="d-flex align-items-center mb-3">
+                            <div class="flex-grow-1">
+                                <h5 class="text-opacity-80 mb-0">TASK COMPLETATI</h5>
+                                <h2 class="mt-1 mb-0"><span id="completedTasksCount">25</span></h2>
+                            </div>
+                            <div class="flex-shrink-0 ms-2">
+                                <div class="fs-28px px-2 py-1 fw-bold rounded-2">+20%</div>
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <i class="fa fa-info-circle"></i>
+                            <span class="ms-1">Task completati questo mese</span>
+                        </div>
+                        <div class="progress mb-2 bg-light" style="height: 6px">
+                            <div class="progress-bar bg-teal" style="width: 50%"></div>
+                        </div>
+                        <div class="mb-4">
+                            <small>Crescita completamento task</small>
+                        </div>
+                        <div class="d-flex align-items-center">
+                            <div class="flex-grow-1">
+                                <div id="conversion-rate-sparkline" style="height: 60px;">
+                                    <canvas id="conversionRateChart" height="50"></canvas>
+                                </div>
+                            </div>
+                            <div class="flex-shrink-0 ms-3">
+                                <a href="/CRM/Admin/taskMenagment" class="d-flex align-items-center text-decoration-none">
+                                    <i class="fa fa-chevron-right ms-1"></i>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- New Clients Card -->
+            <div class="col-xl-4 col-lg-6 mb-3">
+                <div class="card border-0 overflow-hidden fs-13px" style="min-height: 320px;">
+                    <div class="card-body position-relative">
+                        <div class="d-flex align-items-center mb-3">
+                            <div class="flex-grow-1">
+                                <h5 class="text-opacity-80 mb-0">NUOVI CLIENTI</h5>
+                                <h2 class="mt-1 mb-0"><span id="newClientsCount">16</span></h2>
+                            </div>
+                            <div class="flex-shrink-0 ms-2">
+                                <div class="fs-28px px-2 py-1 fw-bold rounded-2">+10%</div>
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <i class="fa fa-info-circle"></i>
+                            <span class="ms-1">Clienti aggiunti questo mese</span>
+                        </div>
+                        <div class="progress mb-2 bg-light" style="height: 6px">
+                            <div class="progress-bar bg-blue" style="width: 25%"></div>
+                        </div>
+                        <div class="mb-4">
+                            <small>Crescita acquisizione clienti</small>
+                        </div>
+                        <div class="d-flex align-items-center">
+                            <div class="flex-grow-1">
+                                <div id="store-session-sparkline" style="height: 60px;">
+                                    <canvas id="storeSessionChart" height="50"></canvas>
+                                </div>
+                            </div>
+                            <div class="flex-shrink-0 ms-3">
+                                <a href="/CRM/Admin/UserList" class="d-flex align-items-center text-decoration-none">
+                                    <i class="fa fa-chevron-right ms-1"></i>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Content Row -->
+        <div class="row mt-4">
+            <!-- Sales Chart Column -->
+            <div class="col-lg-8">
+                <div class="card-analytics">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-center mb-4">
+                            <h5 class="mb-0">Clienti aggiunti annualmente</h5>
+                            <div class="btn-group" role="group">
+                                <button type="button" class="btn btn-sm btn-outline-secondary">Settimana</button>
+                                <button type="button" class="btn btn-sm btn-outline-secondary">Mese</button>
+                                <button type="button" class="btn btn-sm btn-outline-secondary active">Anno</button>
+                            </div>
+                        </div>
+                        <div id="sales-chart" style="height: 300px;"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Recent Activities Column -->
+            <div class="col-lg-4">
+                <div class="card-analytics">
+                    <div class="card-body">
+                        <h5 class="mb-4">Attività Recenti</h5>
+
+                        <!-- Ongoing Task Today -->
+                        <div class="d-flex mb-4">
+                            <div class="flex-shrink-0">
+                                <div class="bg-warning bg-opacity-10 text-warning rounded-circle p-2" style="width: 40px; height: 40px; display: flex; align-items: center; justify-content: center;">
+                                    <i class="fas fa-tasks"></i>
+                                </div>
+                            </div>
+                            <div class="flex-grow-1 ms-3">
+                                <h6 class="mb-1">Task in corso: Aggiornamento Sito</h6>
+                                <p class="small mb-0">Oggi</p>
+                            </div>
+                        </div>
+
+                        <!-- Completed Task Activity -->
+                        <div class="d-flex mb-4">
+                            <div class="flex-shrink-0">
+                                <div class="bg-success bg-opacity-10 text-success rounded-circle p-2" style="width: 40px; height: 40px; display: flex; align-items: center; justify-content: center;">
+                                    <i class="fas fa-check-circle"></i>
+                                </div>
+                            </div>
+                            <div class="flex-grow-1 ms-3">
+                                <h6 class="mb-1">Task numero 4 completato</h6>
+                                <p class="small mb-0">Proprio ora</p>
+                            </div>
+                        </div>
+
+                        <!-- New Client Registered -->
+                        <div class="d-flex mb-4">
+                            <div class="flex-shrink-0">
+                                <div class="bg-info bg-opacity-10 text-info rounded-circle p-2" style="width: 40px; height: 40px; display: flex; align-items: center; justify-content: center;">
+                                    <i class="fas fa-user-plus"></i>
+                                </div>
+                            </div>
+                            <div class="flex-grow-1 ms-3">
+                                <h6 class="mb-1">Nuovo cliente registrato</h6>
+                                <p class="small mb-0">15 minuti fa</p>
+                            </div>
+                        </div>
+
+                        <!-- New Project Ordered -->
+                        <div class="d-flex mb-4">
+                            <div class="flex-shrink-0">
+                                <div class="bg-primary bg-opacity-10 text-primary rounded-circle p-2" style="width: 40px; height: 40px; display: flex; align-items: center; justify-content: center;">
+                                    <i class="fas fa-project-diagram"></i>
+                                </div>
+                            </div>
+                            <div class="flex-grow-1 ms-3">
+                                <h6 class="mb-1">Nuovo progetto ordinato</h6>
+                                <p class="small mb-0">30 minuti fa</p>
+                            </div>
+                        </div>
+
+                        <!-- New Message -->
+                        <div class="d-flex">
+                            <div class="flex-shrink-0">
+                                <div class="bg-info bg-opacity-10 text-info rounded-circle p-2" style="width: 40px; height: 40px; display: flex; align-items: center; justify-content: center;">
+                                    <i class="fas fa-comment-alt"></i>
+                                </div>
+                            </div>
+                            <div class="flex-grow-1 ms-3">
+                                <h6 class="mb-1">Nuovo messaggio da Sarah</h6>
+                                <p class="small mb-0">2 ore fa</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Bottom Row -->
+        <div class="row mt-4">
+            <div class="col-md-6">
+                <div class="card-analytics">
+                    <div class="card-body">
+                        <h5 class="card-title">Progetti Clienti Attivi</h5>
+                        <div class="table-responsive">
+                            <table class="table table-hover table-admin mb-0">
+                                <thead>
+                                    <tr>
+                                        <th>Progetto</th>
+                                        <th>Tempo Limite</th>
+                                        <th>Prezzo</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td>Rinnovamento UI/UX</td>
+                                        <td>2 mesi</td>
+                                        <td>€8.250</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Refactoring API</td>
+                                        <td>5 mesi</td>
+                                        <td>€9.450</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Piattaforma SaaS</td>
+                                        <td>1 anno</td>
+                                        <td>€12.560</td>
+                                    </tr>
+                                    <tr>
+                                        <td>App Gestione Clienti</td>
+                                        <td>1 mese</td>
+                                        <td>€1.940</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-6">
+                <div class="card-analytics">
+                    <div class="card-body">
+                        <h5 class="card-title">Strumenti Rapidi Admin</h5>
+                        <div class="row">
+                            <div class="col-6 mb-3">
+                                <a href="/CRM/Admin/ProjectManagement" class="btn btn-outline-primary w-100 py-3">
+                                    <i class="fas fa-plus me-2"></i> Aggiungi Progetto
+                                </a>
+                            </div>
+                            <div class="col-6 mb-3">
+                                <a href="/CRM/Admin/taskMenagment" class="btn btn-outline-success w-100 py-3">
+                                    <i class="fas fa-user-plus me-2"></i> Aggiungi Task
+                                </a>
+                            </div>
+                            <div class="col-6 mb-3">
+                                <a href="/CRM/Admin/UserList" class="btn btn-outline-success w-100 py-3">
+                                    <i class="fas fa-user me-2"></i> Elenco Utenti
+                                </a>
+                            </div>
+                            <div class="col-6 mb-3">
+                                <a href="/CRM/Chat" class="btn btn-outline-warning w-100 py-3">
+                                    <i class="fas fa-comment me-2"></i> Chat
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- WORKER DASHBOARD -->
+    <div class="container-custom worker-only">
+        <h2 class="heading-custom">Il Mio Orario di Lavoro Questa Settimana</h2>
+
+        <table class="table-custom">
+            <thead>
+                <tr>
+                    <th>Giorno</th>
+                    <th>Stato</th>
+                    <th>Orari</th>
+                </tr>
+            </thead>
+            <tbody id="schedule-custom">
+                <!-- Rows will be added here by JavaScript -->
+            </tbody>
+        </table>
+    </div>
+
+
+    <div class="container my-5 worker-only">
+        <div class="row mb-4">
+            <!-- Pending Tasks Card -->
+            <div class="col-md-4 mb-3 position-relative">
+                <div class="card shadow-sm text-center p-3 hover-shadow" style="cursor: pointer;" data-bs-toggle="dropdown">
+                    <h5>Task in Attesa <i class="fas fa-chevron-down small"></i></h5>
+                    <p class="fs-3" id="pendingTasks">0</p>
+                </div>
+                <div class="dropdown-menu w-100" id="pendingDropdown"></div>
+            </div>
+
+            <!-- Ongoing Tasks Card -->
+            <div class="col-md-4 mb-3 position-relative">
+                <div class="card shadow-sm text-center p-3 hover-shadow" style="cursor: pointer;" data-bs-toggle="dropdown">
+                    <h5>Task in Corso <i class="fas fa-chevron-down small"></i></h5>
+                    <p class="fs-3" id="ongoingTasks">0</p>
+                </div>
+                <div class="dropdown-menu w-100" id="ongoingDropdown"></div>
+            </div>
+
+            <!-- Completed Tasks Card -->
+            <div class="col-md-4 mb-3 position-relative">
+                <div class="card shadow-sm text-center p-3 hover-shadow" style="cursor: pointer;" data-bs-toggle="dropdown">
+                    <h5>Task Completati <i class="fas fa-chevron-down small"></i></h5>
+                    <p class="fs-3" id="completedTasks">0</p>
+                </div>
+                <div class="dropdown-menu w-100" id="completedDropdown"></div>
+            </div>
+        </div>
+
+        <!-- Admin Notes -->
+        <div class="card shadow-sm">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="fas fa-bullhorn me-2"></i> Note dell'Amministratore</h5>
+            </div>
+            <ul class="list-group list-group-flush admin-notes-list" id="adminNotesList"></ul>
+        </div>
+    </div>
+
+    <!-- CLIENT DASHBOARD -->
+    <div class="container dashboard-container client-only">
+        <div class="row g-4">
+            <!-- Profile Overview -->
+            <div class="col-md-4">
+                <div class="profile-card">
+                    <h4 class="mb-3"><i class="fas fa-user-circle me-2"></i>Profilo Cliente</h4>
+                    <p><span class="info-label">Nome:</span> <span id="clientName">Cliente</span></p>
+                    <p><span class="info-label">Email:</span> <span id="clientEmail">client@example.com</span></p>
+                    <p><span class="info-label">Ruolo:</span> Cliente</p>
+                    <p><span class="info-label">Membro dal:</span> <span id="clientSince">12/01/2023</span></p>
+                </div>
+            </div>
+
+            <!-- My Projects -->
+            <div class="col-md-8">
+                <div class="card-light">
+                    <div class="section-title"><i class="fas fa-folder-open me-2"></i>I Miei Progetti</div>
+
+                    <!-- Project 1 -->
+                    <div onclick="openProjectPage()" class="project-card p-3 mb-3 border rounded">
+                        <div class="d-flex justify-content-between align-items-start">
+                            <div>
+                                <strong>Rinnovamento Sito Web</strong><br>
+                                <small>Stato: <span class="text-warning">In Corso</span></small><br>
+                                <small>Lavoratori: <strong>3</strong></small><br>
+                                <small>Task Incompleti: <strong>4</strong></small>
+                            </div>
+                            <div class="text-end">
+                                <small>Scadenza: <strong>01/05/2025</strong></small>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Project 2 -->
+                    <div onclick="openProjectPage()" class="project-card p-3 mb-3 border rounded">
+                        <div class="d-flex justify-content-between align-items-start">
+                            <div>
+                                <strong>Modulo CRM</strong><br>
+                                <small>Stato: <span class="text-success">Completato</span></small><br>
+                                <small>Lavoratori: <strong>2</strong></small><br>
+                                <small>Task Incompleti: <strong>0</strong></small>
+                            </div>
+                            <div class="text-end">
+                                <small>Scadenza: <strong>30/03/2025</strong></small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Upcoming Event -->
+            <div class="col-md-6">
+                <div class="card-light">
+                    <div class="section-title"><i class="fas fa-calendar-alt me-2"></i>Evento Imminente</div>
+                    <p><strong>Incontro Annuale Clienti</strong></p>
+                    <p>Data: 5 Maggio 2025</p>
+                    <p>Luogo: Zoom (Online)</p>
+                </div>
+            </div>
+
+            <!-- Announcements -->
+            <div class="col-md-6">
+                <div class="card-light">
+                    <div class="section-title"><i class="fas fa-bullhorn me-2"></i>Annunci</div>
+                    <ul class="mb-0">
+                        <li>🛠️ Aggiornamento piattaforma il 25 aprile</li>
+                        <li>🎉 Nuovi strumenti di collaborazione disponibili</li>
+                        <li>📣 Prova la nuova interfaccia della dashboard</li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Quick Actions -->
+            <h5 class="section-title">⚡ Azioni Rapide</h5>
+            <div class="col-md-12 d-flex gap-3 mt-4">
+                <a href="/CRM/Chat" class="btn btn-purple">
+                    <i class="fas fa-comment-dots me-2"></i>Chat
+                </a>
+                <a href="/CRM/Client/Project" class="btn btn-purple">
+                    <i class="fas fa-project-diagram me-2"></i>I Miei Progetti
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- USER DASHBOARD -->
+    <div class="container dashboard-container user-only">
+        <div class="row g-4">
+            <!-- Profile Overview -->
+            <div class="col-md-4">
+                <div class="profile-card">
+                    <h4 class="mb-3"><i class="fas fa-user-circle me-2"></i>Profilo Utente</h4>
+                    <p><span class="info-label">Nome:</span> <span id="userName">Utente</span></p>
+                    <p><span class="info-label">Email:</span> <span id="userEmail">user@example.com</span></p>
+                    <p><span class="info-label">Ruolo:</span> Utente</p>
+                    <p><span class="info-label">Membro dal:</span> <span id="userSince">12/01/2023</span></p>
+                </div>
+            </div>
+
+            <!-- My Projects -->
+            <div class="col-md-8">
+                <div class="card-light">
+                    <div class="section-title"><i class="fas fa-folder-open me-2"></i>I Miei Progetti</div>
+                    <div class="alert alert-info">
+                        <i class="fas fa-info-circle me-2"></i> Non hai ancora progetti assegnati. Contatta l'amministratore per maggiori informazioni.
+                    </div>
+                </div>
+            </div>
+
+            <!-- Quick Actions -->
+            <h5 class="section-title">⚡ Azioni Rapide</h5>
+            <div class="col-md-12 d-flex gap-3 mt-4">
+                <a href="/CRM/Chat" class="btn btn-purple">
+                    <i class="fas fa-comment-dots me-2"></i>Chat
+                </a>
+                <a href="/CRM/Profile" class="btn btn-purple">
+                    <i class="fas fa-user-edit me-2"></i>Modifica Profilo
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function openProjectPage() {
+            window.location.href = "/CRM/Client/Project";
+        }
+    </script>
+
+    <!-- JavaScript for Worker Dashboard -->
+    <script>
+        // Worker Dashboard Functions
+        function setupWorkerDashboard() {
+            const loggedInWorker = JSON.parse(localStorage.getItem("currentUser") || sessionStorage.getItem('currentUser'));
+            const tasks = JSON.parse(localStorage.getItem("tasks")) || [];
+
+            if (!loggedInWorker) {
+                console.error("No user logged in.");
+                return;
+            }
+
+            // Use the name directly to match the worker in tasks
+            const fullName = loggedInWorker.name; // Assuming name is a single string (e.g., "User2333 User2333")
+
+            if (!fullName) {
+                console.error("Current user has no name defined.");
+                return;
+            }
+
+            // Filter tasks for this user
+            const workerTasks = tasks.filter(task => task.worker === fullName.trim());
+
+            // Group by status
+            const pendingTasks = workerTasks.filter(t => t.status === "Pending");
+            const ongoingTasks = workerTasks.filter(t => t.status === "Ongoing" || t.status === "In Progress");
+            const completedTasks = workerTasks.filter(t => t.status === "Completed");
+
+            // Update UI counts
+            document.getElementById("pendingTasks").textContent = pendingTasks.length;
+            document.getElementById("ongoingTasks").textContent = ongoingTasks.length;
+            document.getElementById("completedTasks").textContent = completedTasks.length;
+
+            // Render dropdowns
+            renderDropdown(pendingTasks, "pendingDropdown");
+            renderDropdown(ongoingTasks, "ongoingDropdown");
+            renderDropdown(completedTasks, "completedDropdown");
+        }
+
+        function renderDropdown(list, dropdownId) {
+            const container = document.getElementById(dropdownId);
+            container.innerHTML = "";
+
+            if (list.length === 0) {
+                container.innerHTML = `<span class="dropdown-item text-muted">Nessun task disponibile</span>`;
+            } else {
+                list.forEach(task => {
+                    const item = document.createElement("a");
+                    item.href = `/CRM/Worker/Task_W?taskId=${task.title}&status=${task.status}`;
+                    item.className = "dropdown-item d-flex justify-content-between align-items-center";
+                    item.innerHTML = `
+                        <div>
+                            <strong>${task.title}</strong><br>
+                            <small>${task.project} • Scadenza: ${task.dueDate}</small>
+                        </div>
+                    `;
+                    container.appendChild(item);
+                });
+            }
+        
+
+            function toggleDropdown(cardId, dropdownId) {
+                const card = document.getElementById(cardId);
+                const dropdown = document.getElementById(dropdownId);
+                let isOpen = false;
+
+                card.addEventListener("click", (e) => {
+                    e.stopPropagation();
+
+                    // Close other dropdowns
+                    document.querySelectorAll('.dropdown-menu').forEach(menu => {
+                        if (menu.id !== dropdownId) {
+                            menu.style.display = "none";
+                        }
+                    });
+
+                    // Toggle this one
+                    isOpen = dropdown.style.display !== "block";
+                    dropdown.style.display = isOpen ? "block" : "none";
+                });
+
+                // Close on outside click
+                document.addEventListener("click", () => {
+                    dropdown.style.display = "none";
+                    isOpen = false;
+                });
+            }
+        }
+
+        // Worker Schedule Setup
+        function setupWorkerSchedule() {
+            const days = ['Domenica', 'Lunedì', 'Martedì', 'Mercoledì', 'Giovedì', 'Venerdì', 'Sabato'];
+            const today = new Date().getDay();
+            const todayName = days[today];
+
+            const mySchedule = [
+                { day: "Lunedì", working: true, start: "8:00", end: "16:00" },
+                { day: "Martedì", working: true, start: "8:00", end: "16:00" },
+                { day: "Mercoledì", working: false },
+                { day: "Giovedì", working: true, start: "9:00", end: "17:00" },
+                { day: "Venerdì", working: true, start: "8:00", end: "15:00" },
+                { day: "Sabato", working: false },
+                { day: "Domenica", working: false }
+            ];
+
+            const scheduleBody = document.getElementById('schedule-custom');
+            if (scheduleBody) {
+                scheduleBody.innerHTML = '';
+
+                mySchedule.forEach(day => {
+                    const row = document.createElement('tr');
+                    if (day.day === todayName) {
+                        row.classList.add('today-custom');
+                    }
+
+                    row.innerHTML = `
+                        <td>${day.day}</td>
+                        <td>
+                            <span class="${day.working ? 'working-custom' : 'day-off-custom'}">
+                                ${day.working ? 'Lavoro' : 'Giorno Libero'}
+                            </span>
+                        </td>
+                        <td>${day.working ? `${day.start} - ${day.end}` : '-'}</td>
+                    `;
+
+                    scheduleBody.appendChild(row);
+                });
+            }
+        }
+
+        // Admin Notes Setup
+        function setupAdminNotes() {
+            const adminNotesList = [
+                "Non dimenticare di inviare il tuo timesheet entro venerdì.",
+                "Riunione di team programmata per domani alle 10:00.",
+                "I nuovi protocolli di sicurezza sono stati inviati via email.",
+                "Tutti i progetti devono essere revisionati entro fine mese."
+            ];
+
+            const adminNotesContainer = document.getElementById("adminNotesList");
+            adminNotesList.forEach(note => {
+                const listItem = document.createElement("li");
+                listItem.className = "list-group-item";
+                listItem.textContent = note;
+                adminNotesContainer.appendChild(listItem);
+            });
+        }
+
+        // Charts Setup
+        function setupCharts() {
+            // Initialize sparkline charts
+            function createSparkline(selector, data, color) {
+                const options = {
+                    series: [{ data }],
+                    chart: {
+                        type: 'line',
+                        height: 60,
+                        width: '100%',
+                        sparkline: { enabled: true }
+                    },
+                    stroke: {
+                        curve: 'smooth',
+                        width: 2,
+                        colors: [color]
+                    },
+                    fill: { opacity: 1, colors: [color] },
+                    markers: { size: 0 },
+                    tooltip: {
+                        fixed: { enabled: false },
+                        x: { show: false },
+                        y: { title: { formatter: () => '' } },
+                        marker: { show: false }
+                    }
+                };
+
+                const chart = new ApexCharts(document.querySelector(selector), options);
+                chart.render();
+            }
+
+            // Render sparklines
+            createSparkline("#total-sales-sparkline", [30, 35, 32, 40, 45, 50, 48], "#f59e0b");
+            createSparkline("#conversion-rate-sparkline", [10, 20, 15, 25, 20, 30, 25], "#14b8a6");
+            createSparkline("#store-session-sparkline", [5, 10, 8, 12, 14, 10, 16], "#3b82f6");
+
+            // Sales Chart
+            var salesChartOptions = {
+                series: [{ name: 'Clienti', data: [30, 40, 35, 50, 49, 60, 70, 91, 125, 110, 95, 80] }],
+                chart: {
+                    height: 300,
+                    type: 'area',
+                    toolbar: { show: false }
+                },
+                colors: ['#6c5ce7'],
+                dataLabels: { enabled: false },
+                stroke: { curve: 'smooth', width: 3 },
+                fill: {
+                    type: 'gradient',
+                    gradient: {
+                        shadeIntensity: 1,
+                        opacityFrom: 0.7,
+                        opacityTo: 0.3,
+                        stops: [0, 90, 100]
+                    }
+                },
+                xaxis: {
+                    categories: ['2014', '2015', '2016', '2017', '2018', '2019', '2020', '2021', '2022', '2023', '2024', '2025'],
+                    labels: { style: { colors: '#888' } }
+                },
+                yaxis: { labels: { style: { colors: '#888' } } },
+                tooltip: { y: { formatter: function (val) { return val; } } }
+            };
+
+            var salesChart = new ApexCharts(document.querySelector("#sales-chart"), salesChartOptions);
+            salesChart.render();
+        }
+
+        // Role Detection and Dashboard Setup
+        function setupDashboard() {
+            // Get user session from localStorage or sessionStorage
+            const currentUser = JSON.parse(localStorage.getItem('currentUser')) ||
+                              JSON.parse(sessionStorage.getItem('currentUser'));
+
+            console.log('Current user:', currentUser);
+
+            if (!currentUser) {
+                // If no user is logged in, redirect to login page
+                window.location.href = '/CRM/Login';
+                return;
+            }
+
+            const userRole = currentUser.role || currentUser.Ruolo; // Check both possible property names
+            console.log('User role:', userRole);
+
+            // Hide all role-specific sections by default
+            document.querySelectorAll('.admin-only, .worker-only, .client-only, .user-only').forEach(item => {
+                item.style.display = 'none';
+            });
+
+            // Show elements based on user role
+            if (userRole === 'admin') {
+                document.querySelectorAll('.admin-only').forEach(item => {
+                    item.style.display = 'block';
+                });
+
+                // Load projects count for admin
+                const projects = JSON.parse(localStorage.getItem("projects")) || [];
+                document.getElementById("newProjectsCount").textContent = projects.length;
+
+                // Setup admin-specific features
+                setupCharts();
+
+            } else if (userRole === 'worker') {
+                document.querySelectorAll('.worker-only').forEach(item => {
+                    item.style.display = 'block';
+                });
+
+                // Setup worker-specific features
+                setupWorkerDashboard();
+                setupWorkerSchedule();
+                setupAdminNotes();
+
+            } else if (userRole === 'client') {
+                document.querySelectorAll('.client-only').forEach(item => {
+                    item.style.display = 'block';
+                });
+
+                // Load client info
+                const users = JSON.parse(localStorage.getItem('users')) || [];
+                const userData = users.find(u => u.id === currentUser.id);
+
+                if (userData) {
+                    document.getElementById('clientName').textContent = `${userData.Nome} ${userData.Cognome}`;
+                    document.getElementById('clientEmail').textContent = userData.email;
+                    document.getElementById('clientSince').textContent = userData.creatoA;
+                }
+            } else if (userRole === 'user') {
+                document.querySelectorAll('.user-only').forEach(item => {
+                    item.style.display = 'block';
+                });
+
+                // Load user info
+                const users = JSON.parse(localStorage.getItem('users')) || [];
+                const userData = users.find(u => u.id === currentUser.id);
+
+                if (userData) {
+                    document.getElementById('userName').textContent = `${userData.Nome} ${userData.Cognome}`;
+                    document.getElementById('userEmail').textContent = userData.email;
+                    document.getElementById('userSince').textContent = userData.creatoA;
+                }
+            } else {
+                // If role is not recognized, redirect to login
+                window.location.href = '/CRM/Login';
+            }
+        }
+
+        // Project Page Navigation
+        function openProjectPage() {
+            window.location.href = "/CRM/Client/Project";
+        }
+
+        // Initialize everything when DOM is loaded
+        document.addEventListener('DOMContentLoaded', function() {
+            setupDashboard();
+        });
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
+</body>
+</html>

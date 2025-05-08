@@ -1,0 +1,225 @@
+﻿@page
+@model CRM_Project.Pages.CRM.Worker.chat_WModel
+@{
+}
+
+<style>
+    html, body {
+        height: 100%;
+        overflow: auto;
+        background-color: var(--bg-color);
+        color: var(--text-color);
+    }
+
+    .dashboard-header {
+        background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+        color: white;
+        padding: 25px 0;
+        margin-bottom: 30px;
+        box-shadow: 0 4px 20px rgba(108, 92, 231, 0.3);
+    }
+
+    .project-card {
+        background-color: var(--card-bg);
+        color: var(--text-color);
+        border-radius: 10px;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        padding: 20px;
+        margin-bottom: 20px;
+    }
+
+        .project-card h5 {
+            font-size: 1.2rem;
+            font-weight: bold;
+        }
+
+    .task-list {
+        margin-top: 10px;
+        padding-left: 20px;
+    }
+
+        .task-list li {
+            margin-bottom: 5px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 5px 0;
+            border-bottom: 1px solid rgba(0,0,0,0.1);
+        }
+
+    .btn-purple {
+        background-color: var(--primary-color);
+        color: white;
+        border: none;
+        padding: 5px 10px;
+        border-radius: 5px;
+        font-size: 0.9rem;
+    }
+
+        .btn-purple:hover {
+            background-color: #5a4bd8;
+        }
+
+    .task-details {
+        flex-grow: 1;
+    }
+
+    .task-status {
+        margin-left: 10px;
+    }
+
+    .badge {
+        font-size: 0.8rem;
+        padding: 4px 8px;
+    }
+
+    .bg-success {
+        background-color: #198754 !important;
+    }
+
+    .bg-warning {
+        background-color: #ffc107 !important;
+        color: #212529 !important;
+    }
+
+    .bg-secondary {
+        background-color: #6c757d !important;
+    }
+</style>
+
+<div class="dashboard-header bg-purple text-white p-4 mb-4">
+    <div class="container">
+        <h2><i class="fas fa-project-diagram me-2"></i> I miei progetti</h2>
+        <p class="mb-0">Panoramica dei tuoi progetti e compiti assegnati</p>
+    </div>
+</div>
+
+<div class="container">
+    <div id="workerProjects"></div>
+</div>
+
+
+<script>
+        // Define the t object with an escape function
+        const t = {
+            escape: function(html) {
+                return html ? String(html).replace(/[&<>"'`=\/]/g, function(match) {
+                    return {
+                        '&': '&amp;',
+                        '<': '&lt;',
+                        '>': '&gt;',
+                        '"': '&quot;',
+                        "'": '&#39;',
+                        '/': '&#x2F;',
+                        '`': '&#x60;',
+                        '=': '&#x3D;'
+                    }[match];
+                }) : '';
+            }
+        };
+
+        document.addEventListener('DOMContentLoaded', function() {
+            // Safely retrieve and parse currentUser from localStorage or sessionStorage
+            let currentUser = null;
+            try {
+                currentUser = JSON.parse(localStorage.getItem('currentUser')) || JSON.parse(sessionStorage.getItem('currentUser'));
+            } catch (error) {
+                console.error('Error parsing currentUser:', error);
+            }
+
+            const container = document.getElementById("workerProjects");
+            if (!container) return;
+
+            if (!currentUser || currentUser.role !== 'worker') { // Updated to check 'role' instead of 'Ruolo'
+                const errorMsg = !currentUser ?
+                'Nessun utente ha effettuato laccesso. Effettua il login.' :
+
+                container.innerHTML = `
+                    <div class="alert alert-danger">
+                        ${errorMsg}
+                    </div>
+                `;
+                return;
+            }
+
+            // Ensure name exists in currentUser
+            const loggedInWorkerName = `${currentUser.name || 'Unknown'}`;
+            console.log(loggedInWorkerName);
+
+            // Get projects and tasks from localStorage
+            const projects = JSON.parse(localStorage.getItem("projects")) || [];
+            const tasks = JSON.parse(localStorage.getItem("tasks")) || [];
+
+            // Filter projects where this worker is a team member or team leader
+            const workerProjects = projects.filter(project =>
+                (project.teamMembers && project.teamMembers.includes(loggedInWorkerName)) ||
+                project.teamLeader === loggedInWorkerName
+            );
+
+            // Filter tasks assigned to this worker
+            const workerTasks = tasks.filter(task =>
+                task.worker && task.worker.trim() === loggedInWorkerName.trim()
+            );
+
+            // Group tasks by project
+            const groupedTasks = workerProjects.map(project => {
+                return {
+                    project: project,
+                    tasks: workerTasks.filter(task => task.project === project.name)
+                };
+            });
+
+            if (groupedTasks.length === 0) {
+                container.innerHTML = `
+                    <div class="alert alert-info">
+                    Al momento non ti sono assegnati progetti o attività.
+                    </div>
+                `;
+            } else {
+                container.innerHTML = ''; // Clear previous content
+
+                groupedTasks.forEach(projectData => {
+                    const project = projectData.project;
+                    const projectTasks = projectData.tasks;
+
+                    const taskList = projectTasks.map(task => `
+                        <li>
+                            <div class="task-details">
+                                <strong>${t.escape(task.title)}</strong>
+                                <small class=" d-block">Scadenza: ${t.escape(task.dueDate)}</small>
+                                ${task.description ? `<small class=" d-block">Descrizione: ${t.escape(task.description)}</small>` : ''}
+                            </div>
+                            <span class="task-status badge ${
+                                task.status === 'Completed' ? 'bg-success' :
+                            task.status === 'In Progress' ? 'bg-warning text-dark' : 'bg-secondary'
+                            }">
+                                ${t.escape(task.status)}
+                            </span>
+                        </li>
+                    `).join("");
+
+                    const projectId = project.name.replace(/[^a-zA-Z0-9]/g, '-');
+                    container.innerHTML += `
+                        <div class="project-card">
+                            <h5>${t.escape(project.name)}</h5>
+                        <p>Hai <strong>${projectTasks.length}</strong> task(s) in questo progetto.</p>
+                            <button class="btn-purple" onclick="toggleTaskList('${t.escape(projectId)}')">
+                            <i class="fas fa-tasks me-1"></i> Visualizza  Tasks
+                            </button>
+                            <ul class="task-list" id="taskList-${t.escape(projectId)}" style="display: none;">
+                                ${taskList}
+                            </ul>
+                        </div>
+                    `;
+                });
+            }
+        });
+
+        function toggleTaskList(projectId) {
+            const taskList = document.getElementById(`taskList-${projectId}`);
+            if (taskList) {
+                taskList.style.display = taskList.style.display === "none" ? "block" : "none";
+            }
+        }
+</script>
+

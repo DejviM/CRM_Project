@@ -1,0 +1,293 @@
+﻿@page
+@model CRM_Project.Pages.CRM.Admin.ProjectManagmentF.AddProjectModel
+@{
+    ViewData["Title"] = "Aggiungi Progetto";
+}
+
+<style>
+    html, body {
+        height: 100%;
+        overflow: auto;
+        background-color: var(--bg-color);
+        color: var(--text-color);
+    }
+
+    .compact-form-container {
+        max-width: 600px;
+        margin: 2rem auto;
+        padding: 1.5rem;
+        background-color: var(--card-bg);
+        border-radius: 8px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    }
+
+    .compact-form-group {
+        margin-bottom: 0.75rem;
+    }
+
+    .compact-form-label {
+        font-size: 0.85rem;
+        margin-bottom: 0.25rem;
+        display: block;
+        color: var(--text-color);
+    }
+
+    .compact-form-control {
+        padding: 0.35rem 0.5rem;
+        font-size: 0.85rem;
+        height: calc(1.5em + 0.5rem + 2px);
+        width: 50%;
+        background-color: var(--input-bg);
+        color: var(--input-text);
+        border: 1px solid var(--input-border);
+        border-radius: 4px;
+    }
+
+    .compact-form-select {
+        padding: 0.35rem 0.5rem;
+        font-size: 0.85rem;
+        height: calc(1.5em + 0.5rem + 2px);
+        background-color: var(--input-bg);
+        color: var(--input-text);
+        border: 1px solid var(--input-border);
+        border-radius: 4px;
+    }
+
+    .compact-textarea {
+        min-height: 60px; /* Increased height for description */
+        min-width: 100%;
+        padding: 0.5rem;
+        font-size: 0.85rem;
+        background-color: var(--input-bg);
+        color: var(--input-text);
+        border: 1px solid var(--input-border);
+        border-radius: 4px;
+    }
+
+    .compact-team-box {
+        max-height: 150px;
+        overflow-y: auto;
+        padding: 0.5rem;
+        border: 1px solid var(--input-border);
+        border-radius: 4px;
+        background-color: var(--input-bg);
+    }
+
+    .compact-checkbox {
+        margin-right: 0.5rem;
+    }
+
+    .compact-badge {
+        font-size: 0.75rem;
+        padding: 0.25rem 0.5rem;
+        margin-right: 0.25rem;
+        margin-bottom: 0.25rem;
+        display: inline-flex;
+        align-items: center;
+    }
+
+    .compact-btn {
+        padding: 0.35rem 1rem;
+        font-size: 0.85rem;
+        background-color: #6c5ce7;
+        color: white;
+        border: none;
+        border-radius: 4px;
+    }
+
+        .compact-btn:hover {
+            background-color: #5a4bd8;
+        }
+
+    .form-title {
+        font-size: 1.25rem;
+        margin-bottom: 1.5rem;
+        text-align: center;
+        color: var(--text-color);
+    }
+</style>
+
+<div class="container">
+    <div class="compact-form-container">
+        <h5 class="form-title"><i class="fas fa-folder-plus me-2"></i>Aggiungi Nuovo Progetto</h5>
+
+        <form id="addProjectForm">
+            <div class="compact-form-group">
+                <label class="compact-form-label">Nome Progetto *</label>
+                <input type="text" class="compact-form-control" id="projectName" required>
+            </div>
+
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="compact-form-group">
+                        <label class="compact-form-label">Scadenza *</label>
+                        <input type="date" class="compact-form-control" id="projectDeadline" required>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="compact-form-group">
+                        <label class="compact-form-label">Stato *</label>
+                        <select class="compact-form-select" id="projectStatus" required>
+                            <option value="" selected disabled>Seleziona Stato</option>
+                            <option value="Pending">In attesa</option>
+                            <option value="Ongoing">In corso</option>
+                            <option value="Completed">Completato</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <div class="compact-form-group">
+                <label class="compact-form-label">Descrizione *</label>
+                <textarea class="compact-textarea" id="projectDescription" required></textarea>
+            </div>
+
+            <div class="compact-form-group">
+                <label class="compact-form-label">Cliente *</label>
+                <select class="compact-form-select" id="projectClient" required>
+                    <option value="" selected disabled>Seleziona Cliente</option>
+                </select>
+            </div>
+
+            <div class="compact-form-group">
+                <label class="compact-form-label">Team Leader *</label>
+                <select class="compact-form-select" id="projectTeamLeader" required>
+                    <option value="" selected disabled>Seleziona Team Leader</option>
+                </select>
+            </div>
+
+            <div class="compact-form-group">
+                <label class="compact-form-label">Membri del Team *</label>
+                <div class="compact-team-box">
+                    <div id="teamMembersCheckboxes"></div>
+                </div>
+                <div id="selectedMembersBadges" class="mt-2"></div>
+            </div>
+
+            <div class="d-grid gap-2 mt-4">
+                <button type="submit" class="compact-btn">
+                    <i class="fas fa-save me-1"></i> Aggiungi Progetto
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+    // Load all users and filter workers/clients
+    document.addEventListener("DOMContentLoaded", function() {
+        const allUsers = JSON.parse(localStorage.getItem('users')) || [];
+        const workers = allUsers.filter(user => user.Ruolo === 'worker');
+        const clients = allUsers.filter(user => user.Ruolo === 'client');
+
+        // Populate client dropdown
+        const clientDropdown = document.getElementById("projectClient");
+        clients.forEach(client => {
+            const option = document.createElement("option");
+            option.value = `${client.Nome} ${client.Cognome}`;
+            option.textContent = `${client.Nome} ${client.Cognome}`;
+            clientDropdown.appendChild(option);
+        });
+
+        // Populate team leader dropdown and team members
+        const teamLeaderDropdown = document.getElementById("projectTeamLeader");
+        const teamMembersContainer = document.getElementById("teamMembersCheckboxes");
+        let selectedMembers = [];
+
+        workers.forEach(worker => {
+            const workerName = `${worker.Nome} ${worker.Cognome}`;
+
+            // Add to team leader dropdown
+            const leaderOption = document.createElement("option");
+            leaderOption.value = workerName;
+            leaderOption.textContent = workerName;
+            teamLeaderDropdown.appendChild(leaderOption);
+
+            // Create checkbox for team member
+            const checkboxDiv = document.createElement("div");
+            checkboxDiv.className = "form-check";
+
+            const checkbox = document.createElement("input");
+            checkbox.type = "checkbox";
+            checkbox.className = "form-check-input compact-checkbox";
+            checkbox.value = workerName;
+            checkbox.id = `member-${worker.id}`;
+
+            const label = document.createElement("label");
+            label.className = "form-check-label";
+            label.htmlFor = `member-${worker.id}`;
+            label.textContent = workerName;
+
+            checkboxDiv.appendChild(checkbox);
+            checkboxDiv.appendChild(label);
+            teamMembersContainer.appendChild(checkboxDiv);
+
+            // Add change event
+            checkbox.addEventListener('change', function() {
+                if (this.checked) {
+                    selectedMembers.push(this.value);
+                } else {
+                    selectedMembers = selectedMembers.filter(m => m !== this.value);
+                }
+                updateSelectedMembers();
+            });
+        });
+
+        // Function to update selected members display
+        function updateSelectedMembers() {
+            const badgesContainer = document.getElementById("selectedMembersBadges");
+            badgesContainer.innerHTML = '';
+
+            selectedMembers.forEach(member => {
+                const badge = document.createElement("span");
+                badge.className = "badge bg-primary compact-badge";
+                badge.textContent = member;
+
+                const removeBtn = document.createElement("button");
+                removeBtn.className = "btn-close btn-close-white ms-1";
+                removeBtn.style.fontSize = "0.5rem";
+                removeBtn.onclick = (e) => {
+                    e.preventDefault();
+                    selectedMembers = selectedMembers.filter(m => m !== member);
+                    document.querySelector(`input[value="${member}"]`).checked = false;
+                    updateSelectedMembers();
+                };
+
+                badge.appendChild(removeBtn);
+                badgesContainer.appendChild(badge);
+            });
+        }
+
+        // Form submission
+        document.getElementById("addProjectForm").addEventListener("submit", function(e) {
+            e.preventDefault();
+
+            const newProject = {
+                name: document.getElementById("projectName").value,
+                deadline: document.getElementById("projectDeadline").value,
+                status: document.getElementById("projectStatus").value,
+                description: document.getElementById("projectDescription").value,
+                teamLeader: document.getElementById("projectTeamLeader").value,
+                teamMembers: selectedMembers,
+                client: document.getElementById("projectClient").value,
+                createdAt: new Date().toISOString()
+            };
+
+            // Validate
+            if (!newProject.name || !newProject.deadline || !newProject.status ||
+                !newProject.description || !newProject.teamLeader ||
+                selectedMembers.length === 0 || !newProject.client) {
+                alert("Per favore compila tutti i campi obbligatori (*)");
+                return;
+            }
+
+            // Save to localStorage
+            const existingProjects = JSON.parse(localStorage.getItem("projects")) || [];
+            existingProjects.unshift(newProject);
+            localStorage.setItem("projects", JSON.stringify(existingProjects));
+
+            // Redirect with cache-busting parameter
+            window.location.href = "/CRM/Admin/ProjectManagement?t=" + Date.now();
+        });
+    });
+</script>

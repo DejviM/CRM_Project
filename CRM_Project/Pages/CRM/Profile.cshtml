@@ -1,0 +1,454 @@
+﻿@page
+@model CRM_Project.Pages.CRM.ProfileModel
+@{
+    ViewData["Title"] = "User Profile";
+}
+
+<style>
+    :root {
+        /* Light theme colors */
+        --primary-color: #6c5ce7;
+        --secondary-color: #a29bfe;
+        --bg-color: #f5f7fb;
+        --text-color: #2d3436;
+        --card-bg: #ffffff;
+        --muted-text: #636e72;
+        --input-bg: #ffffff;
+        --input-text: #2d3436;
+        --input-border: #dfe6e9;
+        --input-placeholder: #b2bec3;
+        --border-color: #e0e0e0;
+        --hover-bg: rgba(108, 92, 231, 0.1);
+    }
+
+    [data-theme="dark"] {
+        /* Dark theme colors */
+        --primary-color: #a29bfe;
+        --secondary-color: #7e6ff1;
+        --bg-color: #1a1a2e;
+        --text-color: #f5f5f5;
+        --card-bg: rgba(255, 255, 255, 0.08);
+        --muted-text: #ccc;
+        --input-bg: #2a2a40;
+        --input-text: #ffffff;
+        --input-border: #444;
+        --input-placeholder: #777;
+        --border-color: #444;
+        --hover-bg: rgba(108, 92, 231, 0.2);
+    }
+
+    body {
+        background-color: var(--bg-color);
+        color: var(--text-color);
+        transition: background-color 0.3s ease, color 0.3s ease;
+    }
+
+    .profile-container {
+        max-width: 800px;
+        margin: 2rem auto;
+        padding: 2rem;
+        background-color: var(--card-bg);
+        border-radius: 12px;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+        transition: all 0.3s ease;
+    }
+
+    .profile-header {
+        text-align: center;
+        margin-bottom: 2rem;
+    }
+
+        .profile-header h2 {
+            color: var(--primary-color);
+            font-weight: 600;
+        }
+
+    .profile-picture-container {
+        position: relative;
+        width: 150px;
+        height: 150px;
+        margin: 0 auto 1.5rem;
+        border-radius: 50%;
+        overflow: hidden;
+        border: 3px solid var(--primary-color);
+        box-shadow: 0 4px 12px rgba(108, 92, 231, 0.3);
+    }
+
+    .profile-picture {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+
+    .profile-picture-upload {
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        background-color: rgba(0, 0, 0, 0.5);
+        color: white;
+        text-align: center;
+        padding: 3px;
+        cursor: pointer;
+        transition: background-color 0.3s;
+        font-size: 0.8rem;
+    }
+
+        .profile-picture-upload:hover {
+            background-color: rgba(0, 0, 0, 0.7);
+        }
+
+    #profilePhotoInput {
+        display: none;
+    }
+
+    .profile-info {
+        margin-bottom: 1.5rem;
+    }
+
+    .profile-info-item {
+        display: flex;
+        margin-bottom: 1rem;
+        padding-bottom: 1rem;
+        border-bottom: 1px solid var(--border-color);
+        align-items: center;
+    }
+
+    .profile-info-label {
+        font-weight: bold;
+        width: 150px;
+        color: var(--primary-color);
+    }
+
+    .profile-info-value {
+        flex: 1;
+        color: var(--text-color);
+    }
+
+    .editable-field {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        width: 100%;
+    }
+
+    .editable-text {
+        flex: 1;
+    }
+
+    .edit-btn {
+        background: none;
+        border: none;
+        color: var(--primary-color);
+        cursor: pointer;
+        font-size: 0.9rem;
+    }
+
+    .edit-input {
+        flex: 1;
+        padding: 5px;
+        border: 1px solid var(--input-border);
+        border-radius: 4px;
+        background-color: var(--input-bg);
+        color: var(--input-text);
+    }
+
+    .save-btn {
+        background-color: var(--primary-color);
+        color: white;
+        border: none;
+        padding: 5px 10px;
+        border-radius: 4px;
+        cursor: pointer;
+        font-size: 0.8rem;
+    }
+
+    .role-badge {
+        display: inline-block;
+        padding: 0.35rem 0.85rem;
+        border-radius: 20px;
+        font-size: 0.85rem;
+        font-weight: bold;
+        text-transform: uppercase;
+        background-color: var(--primary-color);
+        color: white;
+    }
+
+    .btn-purple {
+        background-color: var(--primary-color);
+        color: white;
+        border: none;
+        padding: 0.5rem 1.5rem;
+        border-radius: 8px;
+        transition: background-color 0.3s;
+    }
+
+        .btn-purple:hover {
+            background-color: var(--secondary-color);
+            color: white;
+        }
+
+    .btn-outline-purple {
+        background-color: transparent;
+        color: var(--primary-color);
+        border: 1px solid var(--primary-color);
+        padding: 0.5rem 1.5rem;
+        border-radius: 8px;
+        transition: all 0.3s;
+    }
+
+        .btn-outline-purple:hover {
+            background-color: var(--primary-color);
+            color: white;
+        }
+
+    .preview-container {
+        text-align: center;
+        margin-top: 1rem;
+        display: none;
+        background-color: var(--card-bg);
+        padding: 1rem;
+        border-radius: 8px;
+        border: 1px solid var(--border-color);
+    }
+
+    .preview-title {
+        margin-bottom: 0.5rem;
+        font-weight: bold;
+        color: var(--primary-color);
+    }
+
+    .preview-image {
+        max-width: 200px;
+        max-height: 200px;
+        border-radius: 8px;
+        border: 1px solid var(--border-color);
+        margin-bottom: 1rem;
+    }
+
+    .theme-toggle {
+        position: fixed;
+        top: 1rem;
+        right: 1rem;
+        z-index: 1000;
+    }
+
+    .theme-toggle-btn {
+        background-color: var(--primary-color);
+        color: white;
+        border: none;
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+        transition: all 0.3s;
+    }
+
+        .theme-toggle-btn:hover {
+            transform: scale(1.1);
+        }
+</style>
+
+<div class="profile-container">
+    <div class="profile-header">
+        <h2><i class="fas fa-user-circle me-2"></i>Profilo</h2>
+    </div>
+
+    <div class="profile-picture-container">
+        <img id="profilePhotoDisplay" class="profile-picture" src="/css/image/pfp.jpg" alt="Profile Photo">
+        <label for="profilePhotoInput" class="profile-picture-upload">
+            <i class="fas fa-camera"></i> Cambia
+        </label>
+        <input type="file" id="profilePhotoInput" accept="image/*">
+    </div>
+
+    <div class="preview-container" id="previewContainer">
+        <div class="preview-title">Anteprima Foto</div>
+        <img id="previewImage" class="preview-image" src="" alt="Preview">
+        <div class="mt-3 d-flex justify-content-center gap-2">
+        </div>
+    </div>
+
+    <div class="profile-info">
+        <div class="profile-info-item">
+            <div class="profile-info-label">Nome:</div>
+            <div class="profile-info-value">
+                <input type="text" id="nameInput" class="form-control" value="" placeholder="Inserisci il nome">
+            </div>
+        </div>
+        <div class="profile-info-item">
+            <div class="profile-info-label">Cognome:</div>
+            <div class="profile-info-value">
+                <input type="text" id="lastNameInput" class="form-control" value="" placeholder="Inserisci il cognome">
+            </div>
+        </div>
+        <div class="profile-info-item">
+            <div class="profile-info-label">Email:</div>
+            <div class="profile-info-value" id="profileEmail"></div>
+        </div>
+        <div class="profile-info-item">
+            <div class="profile-info-label">Ruolo:</div>
+            <div class="profile-info-value">
+                <span id="profileRole" class="role-badge"></span>
+            </div>
+        </div>
+        <div class="profile-info-item">
+            <div class="profile-info-label">Data Registrazione:</div>
+            <div class="profile-info-value" id="profileCreatedAt"></div>
+        </div>
+    </div>
+
+    <div class="d-flex justify-content-center mt-4">
+        <button id="saveAllChangesBtn" class="btn-purple">
+            <i class="fas fa-save me-2"></i>Salva Tutte le Modifiche
+        </button>
+    </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        // Load user data
+        const currentUser = JSON.parse(localStorage.getItem('currentUser')) || JSON.parse(sessionStorage.getItem('currentUser'));
+        const users = JSON.parse(localStorage.getItem('users')) || [];
+        const projects = JSON.parse(localStorage.getItem('projects')) || [];
+        const tasks = JSON.parse(localStorage.getItem('tasks')) || [];
+
+        if (!currentUser) {
+            alert('Per favore effettua il login per accedere al profilo');
+            window.location.href = '/CRM/Login';
+            return;
+        }
+
+        // Populate fields with user data
+        const userData = users.find(u => u.email === currentUser.email);
+        if (userData) {
+            document.getElementById('nameInput').value = userData.Nome;
+            document.getElementById('lastNameInput').value = userData.Cognome;
+            document.getElementById('profileEmail').textContent = userData.email;
+            document.getElementById('profileRole').textContent = userData.Ruolo;
+            document.getElementById('profileCreatedAt').textContent = new Date(userData.creatoA).toLocaleDateString('it-IT');
+            if (userData.photo) {
+                document.getElementById('profilePhotoDisplay').src = userData.photo;
+            }
+        }
+
+        // Photo upload functionality
+        const profilePhotoInput = document.getElementById('profilePhotoInput');
+        const profilePhotoDisplay = document.getElementById('profilePhotoDisplay');
+        const previewContainer = document.getElementById('previewContainer');
+        const previewImage = document.getElementById('previewImage');
+        const savePhotoBtn = document.getElementById('savePhotoBtn');
+        const cancelPhotoBtn = document.getElementById('cancelPhotoBtn');
+
+        profilePhotoInput.addEventListener('change', function (e) {
+            if (this.files && this.files[0]) {
+                const reader = new FileReader();
+
+                reader.onload = function (e) {
+                    previewImage.src = e.target.result;
+                    previewContainer.style.display = 'block';
+                };
+
+                reader.readAsDataURL(this.files[0]);
+            }
+        });
+
+        // Save All Changes Button - now handles both name changes and photo upload
+        document.getElementById('saveAllChangesBtn').addEventListener('click', function () {
+            const updatedFirstName = document.getElementById('nameInput').value.trim();
+            const updatedLastName = document.getElementById('lastNameInput').value.trim();
+
+            if (!updatedFirstName || !updatedLastName) {
+                alert('Nome e Cognome non possono essere vuoti.');
+                return;
+            }
+
+            // Check if there's a photo to save
+            if (profilePhotoInput.files && profilePhotoInput.files[0]) {
+                const reader = new FileReader();
+
+                reader.onload = function (e) {
+                    // Update photo first
+                    profilePhotoDisplay.src = e.target.result;
+                    currentUser.photo = e.target.result;
+
+                    // Save to storage
+                    if (localStorage.getItem('currentUser')) {
+                        localStorage.setItem('currentUser', JSON.stringify(currentUser));
+                    } else {
+                        sessionStorage.setItem('currentUser', JSON.stringify(currentUser));
+                    }
+
+                    // Update user data in users array
+                    const userIndex = users.findIndex(u => u.email === currentUser.email);
+                    if (userIndex !== -1) {
+                        users[userIndex].photo = e.target.result;
+                    }
+
+                    // Now update names
+                    updateNames(updatedFirstName, updatedLastName);
+                };
+
+                reader.readAsDataURL(profilePhotoInput.files[0]);
+            } else {
+                // No photo to update, just update names
+                updateNames(updatedFirstName, updatedLastName);
+            }
+        });
+
+        function updateNames(updatedFirstName, updatedLastName) {
+            // Update user data
+            if (userData) {
+                const oldFullName = `${userData.Nome} ${userData.Cognome}`;
+                userData.Nome = updatedFirstName;
+                userData.Cognome = updatedLastName;
+                const newFullName = `${updatedFirstName} ${updatedLastName}`;
+
+                // Update current user
+                currentUser.name = newFullName;
+
+                // Update projects where user is owner or team member
+                projects.forEach(project => {
+                    // Update if user is owner
+                    if (project.ownerName === oldFullName) {
+                        project.ownerName = newFullName;
+                    }
+
+                    // Update if user is in team members
+                    if (project.teamMembers && Array.isArray(project.teamMembers)) {
+                        project.teamMembers = project.teamMembers.map(member =>
+                            member === oldFullName ? newFullName : member
+                        );
+                    }
+                });
+
+                // Update tasks where user is assigned
+                tasks.forEach(task => {
+                    if (task.assignedToName === oldFullName) {
+                        task.assignedToName = newFullName;
+                    }
+                    if (task.worker === oldFullName) {
+                        task.worker = newFullName;
+                    }
+                });
+
+                // Save changes to localStorage
+                localStorage.setItem('users', JSON.stringify(users));
+                localStorage.setItem('projects', JSON.stringify(projects));
+                localStorage.setItem('tasks', JSON.stringify(tasks));
+                localStorage.setItem('currentUser', JSON.stringify(currentUser));
+
+                alert('Tutte le modifiche sono state salvate con successo!');
+
+                // Hide preview container if it's visible
+                previewContainer.style.display = 'none';
+                profilePhotoInput.value = '';
+            }
+        }
+
+    });
+</script>

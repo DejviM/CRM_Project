@@ -1,0 +1,316 @@
+﻿@page
+@model CRM_Project.Pages.CRM.Client.task_CModel
+@{
+}
+
+<style>
+    html, body {
+        height: 100%;
+        overflow: auto;
+        background-color: var(--bg-color);
+        color: var(--text-color);
+    }
+
+    .card {
+        background-color: var(--card-bg);
+        color: var(--text-color);
+        border: none;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+    }
+
+    .modal-content {
+        background-color: var(--modal-bg);
+        color: var(--modal-text-color);
+        border: none;
+    }
+
+    .form-select, .form-control {
+        background-color: var(--input-bg);
+        color: var(--text-color);
+        border: 1px solid var(--input-border);
+    }
+
+        .form-select:focus, .form-control:focus {
+            box-shadow: 0 0 0 0.2rem rgba(108, 92, 231, 0.25);
+        }
+
+        .form-control::placeholder {
+            color: var(--text-color);
+        }
+
+    input,
+    textarea,
+    select {
+        background-color: var(--input-bg);
+        color: var(--input-text);
+        border: 1px solid var(--input-border);
+    }
+
+        input:focus,
+        textarea:focus,
+        select:focus {
+            border-color: var(--primary-color);
+            outline: none;
+            box-shadow: 0 0 0 0.2rem rgba(108, 92, 231, 0.25);
+        }
+
+    .table th {
+        background-color: var(--table-header-bg);
+        color: white;
+    }
+
+    .table td {
+        background-color: var(--table-bg);
+        color: var(--table-text-color);
+        border-color: var(--table-border-color);
+    }
+
+    .bg-purple {
+        background-color: #6c5ce7 !important;
+    }
+
+    .btn-purple {
+        background-color: #6c5ce7;
+        color: white;
+    }
+
+        .btn-purple:hover {
+            background-color: #5a4bd8;
+        }
+
+    .dashboard-header {
+        background: linear-gradient(135deg, #6c5ce7, #a29bfe);
+        color: white;
+        padding: 25px 0;
+        margin-bottom: 30px;
+        box-shadow: 0 4px 20px rgba(108, 92, 231, 0.3);
+    }
+
+    .status-badge {
+        cursor: pointer;
+    }
+</style>
+
+<div class="dashboard-header">
+    <div class="container">
+        <div class="d-flex justify-content-between align-items-center">
+            <div>
+                <h1><i class="fas fa-tasks me-2"></i> I Miei Tasks</h1>
+                <p class="mb-0">Visualizza e gestisci i compiti assegnati</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="container my-4">
+    <div class="row g-2 align-items-center justify-content-center mb-3">
+        <div class="col-md-3">
+            <select class="form-select border-purple" id="taskStatusFilter">
+                <option value="All">Tutti gli stati</option>
+                <option value="Pending">In attesa</option>
+                <option value="In Progress">In corso</option>
+                <option value="Completed">Completato</option>
+            </select>
+        </div>
+        <div class="col-md-6">
+            <div class="input-group">
+                <span class="input-group-text bg-purple text-white border-0">
+                    <i class="fas fa-search"></i>
+                </span>
+                <input type="text" id="taskSearchInput" class="form-control border-0" placeholder="Cerca per titolo del compito...">
+            </div>
+        </div>
+        <div class="col-md-3 text-end">
+            <a href="/CRM/Client/TaskManagment_C/AddTask_C" class="btn btn-purple text-white w-100">
+                <i class="fas fa-plus me-1"></i> Aggiungi Compito
+            </a>
+        </div>
+    </div>
+
+    <div class="card text-light shadow-lg">
+        <div class="card-header bg-purple text-white">
+            <h4 class="mb-0">Lista dei miei compiti</h4>
+        </div>
+        <div class="table-responsive">
+            <table class="table table-striped table-bordered mb-0">
+                <thead class="table-purple">
+                    <tr>
+                        <th>Titolo</th>
+                        <th>Progetto</th>
+                        <th>Scadenza</th>
+                        <th>Stato</th>
+                        <th>Azioni</th>
+                    </tr>
+                </thead>
+                <tbody id="taskTableBody"></tbody>
+            </table>
+        </div>
+        <div class="card-footer d-flex justify-content-end">
+            <ul class="pagination pagination-sm mb-0" id="taskPaginationContainer"></ul>
+        </div>
+    </div>
+</div>
+
+<!-- Modale dei dettagli del compito -->
+<div class="modal fade" id="taskDetailModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header bg-purple text-white">
+                <h5 class="modal-title">Dettagli del Compito</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Chiudi"></button>
+            </div>
+            <div class="modal-body">
+                <p><strong>Titolo:</strong> <span id="modalTaskTitle"></span></p>
+                <p><strong>Progetto:</strong> <span id="modalTaskProject"></span></p>
+                <p><strong>Scadenza:</strong> <span id="modalTaskDeadline"></span></p>
+                <p><strong>Stato:</strong> <span id="modalTaskStatus"></span></p>
+                <p><strong>Descrizione:</strong></p>
+                <p id="modalTaskDescription" class="p-3 rounded"></p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Chiudi</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        let currentUser = null;
+        try {
+            currentUser = JSON.parse(localStorage.getItem('currentUser')) || JSON.parse(sessionStorage.getItem('currentUser'));
+        } catch (error) {
+            console.error('Error parsing currentUser:', error);
+        }
+
+        const container = document.getElementById("taskTableBody");
+        const searchInput = document.getElementById("taskSearchInput");
+        const statusFilter = document.getElementById("taskStatusFilter");
+
+        if (!container) return;
+
+        if (!currentUser || currentUser.role !== 'client') {
+            const errorMsg = !currentUser ?
+                'Nessun utente ha effettuato laccesso. Si prega di effettuare il login.' :
+                'Non sei autorizzato come cliente.';
+
+            container.innerHTML = `
+                <tr>
+                    <td colspan="5" class="text-center text-danger">
+                        ${errorMsg}
+                    </td>
+                </tr>
+            `;
+            return;
+        }
+
+        const loggedInClientName = `${currentUser.name || 'Unknown'}`;
+        console.log("Logged-in client:", loggedInClientName);
+
+        const projects = JSON.parse(localStorage.getItem("projects")) || [];
+        const tasks = JSON.parse(localStorage.getItem("tasks")) || [];
+
+        const clientProjects = projects.filter(project => project.client === loggedInClientName);
+        const clientProjectNames = clientProjects.map(project => project.name);
+        const clientTasks = tasks.filter(task => clientProjectNames.includes(task.project));
+
+        function renderTasks(filteredTasks) {
+            if (filteredTasks.length === 0) {
+                container.innerHTML = `
+                    <tr>
+                        <td colspan="5" class="text-center text-info">
+                            Al momento non sono state trovate attività per i tuoi progetti.
+                        </td>
+                    </tr>
+                `;
+            } else {
+                container.innerHTML = ''; // Clear previous content
+                filteredTasks.forEach((task, index) => {
+                    container.innerHTML += `
+                        <tr>
+                            <td>${escapeHTML(task.title)}</td>
+                            <td>${escapeHTML(task.project)}</td>
+                            <td>${escapeHTML(task.dueDate || 'N/A')}</td>
+                            <td><span class="badge ${
+                                task.status === 'Completed' ? 'bg-success' :
+                                task.status === 'In Progress' ? 'bg-warning text-dark' : 'bg-secondary'
+                            }">${
+                                task.status === 'Completed' ? 'Completato' :
+                                task.status === 'In Progress' ? 'In corso' : 'In attesa'
+                            }</span></td>
+                            <td>
+                                <button class="btn btn-sm btn-info" onclick="viewTaskDetails(${index})" title="Visualizza dettagli">
+                                    <i class="fas fa-info-circle"></i>
+                                </button>
+                                <button class="btn btn-sm btn-warning" onclick="editTask(${index})" title="Modifica">
+                                    <i class="fas fa-edit"></i>
+                                </button>
+                            </td>
+                        </tr>
+                    `;
+                });
+            }
+        }
+
+        function filterAndSearchTasks() {
+            const searchQuery = searchInput.value.toLowerCase();
+            const selectedStatus = statusFilter.value;
+
+            const filteredTasks = clientTasks.filter(task => {
+                const matchesSearch = task.title.toLowerCase().includes(searchQuery);
+                const matchesStatus = selectedStatus === 'All' || task.status === selectedStatus;
+                return matchesSearch && matchesStatus;
+            });
+
+            renderTasks(filteredTasks);
+        }
+
+        // Initial render
+        renderTasks(clientTasks);
+
+        // Event listeners for search and filter
+        searchInput.addEventListener('input', filterAndSearchTasks);
+        statusFilter.addEventListener('change', filterAndSearchTasks);
+    });
+
+    // Escape HTML to prevent XSS
+    function escapeHTML(html) {
+        const div = document.createElement('div');
+        div.textContent = html;
+        return div.innerHTML;
+    }
+
+    // View task details in a modal
+    function viewTaskDetails(index) {
+        const tasks = JSON.parse(localStorage.getItem("tasks")) || [];
+        const task = tasks[index];
+        if (!task) return;
+
+        const modalTaskTitle = document.getElementById("modalTaskTitle");
+        const modalTaskProject = document.getElementById("modalTaskProject");
+        const modalTaskDeadline = document.getElementById("modalTaskDeadline");
+        const modalTaskStatus = document.getElementById("modalTaskStatus");
+        const modalTaskDescription = document.getElementById("modalTaskDescription");
+
+        if (modalTaskTitle) modalTaskTitle.textContent = task.title || 'N/A';
+        if (modalTaskProject) modalTaskProject.textContent = task.project || 'N/A';
+        if (modalTaskDeadline) modalTaskDeadline.textContent = task.dueDate || 'N/A';
+        if (modalTaskStatus) {
+            modalTaskStatus.textContent = task.status === "Completed" ? "Completato" :
+                                          task.status === "In Progress" ? "In corso" : "In attesa";
+        }
+        if (modalTaskDescription) modalTaskDescription.textContent = task.description || 'Nessuna descrizione disponibile.';
+
+        const modal = new bootstrap.Modal(document.getElementById("taskDetailModal"));
+        modal.show();
+    }
+
+    // Redirect to the edit task page
+    function editTask(index) {
+        const tasks = JSON.parse(localStorage.getItem("tasks")) || [];
+        const task = tasks[index];
+        if (!task) return;
+
+        window.location.href = `/CRM/Client/TaskManagment_C/EditTask_C?index=${index}`;
+    }
+</script>

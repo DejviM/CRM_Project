@@ -1,0 +1,337 @@
+﻿@page
+@model CRM_Project.Pages.CRM.Client.ProjectModel
+@{
+}
+<style>
+    html, body {
+        height: 100%;
+        overflow: auto;
+        background-color: var(--bg-color);
+        color: var(--text-color);
+    }
+
+    .modal-content {
+        background-color: var(--modal-bg);
+        color: var(--modal-text-color);
+        border: none;
+    }
+
+    input, textarea, select {
+        background-color: var(--input-bg);
+        color: var(--input-text);
+        border: 1px solid var(--input-border);
+    }
+
+    input:focus, textarea:focus, select:focus {
+        border-color: var(--primary-color);
+        outline: none;
+        box-shadow: 0 0 0 0.2rem rgba(108, 92, 231, 0.25);
+    }
+
+    .table th {
+        background-color: var(--table-header-bg);
+        color: white;
+    }
+
+    .table td {
+        background-color: var(--table-bg);
+        color: var(--table-text-color);
+        border-color: var(--table-border-color);
+    }
+
+    .form-select, .form-control {
+        background-color: var(--input-bg);
+        color: var(--text-color);
+        border: 1px solid var(--input-border);
+    }
+
+    .form-select:focus, .form-control:focus {
+        box-shadow: 0 0 0 0.2rem rgba(108, 92, 231, 0.25);
+    }
+
+        .form-control::placeholder {
+            color: var(--text-color);
+        }
+
+    .btn-purple {
+        background-color: #6c5ce7;
+        color: white;
+    }
+
+    .btn-purple:hover {
+        background-color: #5a4bd8;
+    }
+
+    .btn-action {
+        margin: 0 5px;
+    }
+
+    .pagination {
+        justify-content: center;
+    }
+
+    .bg-purple {
+        background-color: #6c5ce7 !important;
+    }
+
+    .dashboard-header {
+        background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+        color: white;
+        padding: 25px 0;
+        margin-bottom: 30px;
+        box-shadow: 0 4px 20px rgba(108, 92, 231, 0.3);
+    }
+
+    .status-pending {
+        background-color: #6c757d; /* Yellow for "In attesa" */
+        color: white; /* Dark text */
+        padding: 4px 8px;
+        border-radius: 12px;
+        font-size: 0.85rem;
+        font-weight: 500;
+    }
+
+    .status-ongoing {
+        background-color: #ffc107; /* Blue for "In corso" */
+        color: black; /* White text */
+        padding: 4px 8px;
+        border-radius: 12px;
+        font-size: 0.85rem;
+        font-weight: 500;
+    }
+
+    .status-completed {
+        background-color: #198754; /* Green for "Completato" */
+        color: white; /* White text */
+        padding: 4px 8px;
+        border-radius: 12px;
+        font-size: 0.85rem;
+        font-weight: 500;
+    }
+
+</style>
+
+<div class="dashboard-header">
+    <div class="container">
+        <div class="d-flex justify-content-between align-items-center">
+            <div>
+                <h2><i class="fas fa-folder-open me-2"></i> I Miei Progetti</h2>
+                <p>Visualizza e gestisci i tuoi progetti</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="container mb-4">
+    <div class="row g-2 align-items-center">
+        <div class="col-md-3">
+            <select id="statusFilter" class="form-select">
+                <option value="All">Tutti gli stati</option>
+                <option value="Pending">In attesa</option>
+                <option value="Ongoing">In corso</option>
+                <option value="Completed">Completato</option>
+            </select>
+        </div>
+        <div class="col-md-6">
+            <div class="input-group">
+                <span class="input-group-text bg-purple text-white border-0">
+                    <i class="fas fa-search"></i>
+                </span>
+                <input type="text" id="searchInput" class="form-control border-0" placeholder="Cerca progetti...">
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="container">
+    <div class="card shadow-lg">
+        <div class="card-header bg-purple">
+            <h4 class="mb-0">Lista Progetti</h4>
+        </div>
+        <div class="table-responsive">
+            <table class="table table-bordered table-hover mb-0">
+                <thead class="table-primary text-dark">
+                    <tr>
+                        <th>Titolo</th>
+                        <th>Scadenza</th>
+                        <th>Stato</th>
+                        <th>Descrizione</th>
+                        <th>Azioni</th>
+                    </tr>
+                </thead>
+                <tbody id="projectTableBody"></tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<div class="container mt-3">
+    <nav>
+        <ul class="pagination" id="pagination"></ul>
+    </nav>
+</div>
+
+<!-- Modale Dettagli Progetto -->
+<div class="modal fade" id="projectDetailModal" tabindex="-1" aria-labelledby="projectDetailModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header bg-purple text-white">
+                <h5 class="modal-title" id="projectDetailModalLabel">Dettagli del Progetto</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Chiudi"></button>
+            </div>
+            <div class="modal-body">
+                <p><strong>Titolo:</strong> <span id="modalProjectName"></span></p>
+                <p><strong>Scadenza:</strong> <span id="modalProjectDueDate"></span></p>
+                <p><strong>Stato:</strong> <span id="modalProjectStatus"></span></p>
+                <p><strong>Descrizione:</strong></p>
+                <p id="modalProjectDescription" class="p-3 rounded"></p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Chiudi</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        // Safely retrieve and parse currentUser from localStorage or sessionStorage
+        let currentUser = null;
+        try {
+            currentUser = JSON.parse(localStorage.getItem('currentUser')) || JSON.parse(sessionStorage.getItem('currentUser'));
+        } catch (error) {
+            console.error('Error parsing currentUser:', error);
+        }
+
+        const container = document.getElementById("projectTableBody");
+        const searchInput = document.getElementById("searchInput");
+        const statusFilter = document.getElementById("statusFilter");
+
+        if (!container) return;
+
+        // Check if the logged-in user is a client
+        if (!currentUser || currentUser.role !== 'client') {
+            const errorMsg = !currentUser ?
+                'Nessun utente connesso. Effettua il login.' :
+                'Non sei autorizzato come cliente.';
+
+            container.innerHTML = `
+                <tr>
+                    <td colspan="6" class="text-center text-danger">
+                        ${errorMsg}
+                    </td>
+                </tr>
+            `;
+            return;
+        }
+
+        const loggedInClientName = `${currentUser.name || 'Sconosciuto'}`;
+        console.log("Cliente connesso:", loggedInClientName);
+
+        // Get projects from localStorage
+        const projects = JSON.parse(localStorage.getItem("projects")) || [];
+
+        // Filter projects where the client is the owner
+        const clientProjects = projects.filter(project => project.client === loggedInClientName);
+
+        function renderProjects(filteredProjects) {
+            if (filteredProjects.length === 0) {
+                container.innerHTML = `
+                    <tr>
+                        <td colspan="6" class="text-center text-info">
+                            Nessun progetto trovato al momento.
+                        </td>
+                    </tr>
+                `;
+            } else {
+                container.innerHTML = ''; // Clear previous content
+
+                filteredProjects.forEach((project, index) => {
+                    container.innerHTML += `
+                        <tr>
+                            <td>${escapeHTML(project.name)}</td>
+                            <td>${escapeHTML(project.deadline || 'N/A')}</td>
+                            <td><span class="status-badge ${getStatusClass(project.status)}">${
+                                project.status === "Pending" ? "In attesa" :
+                                project.status === "Ongoing" ? "In corso" :
+                                project.status === "Completed" ? "Completato" : "Sconosciuto"
+                            }</span></td>
+                            <td>${escapeHTML(project.description || 'Nessuna descrizione disponibile.')}</td>
+                            <td>
+                                <button class="btn btn-sm btn-info" onclick="viewProjectDetails(${index})" title="Visualizza dettagli">
+                                    <i class="fas fa-info-circle"></i>
+                                </button>
+                            </td>
+                        </tr>
+                    `;
+                });
+            }
+        }
+
+        function filterAndSearchProjects() {
+            const searchQuery = searchInput.value.toLowerCase();
+            const selectedStatus = statusFilter.value;
+
+            const filteredProjects = clientProjects.filter(project => {
+                const matchesSearch = project.name.toLowerCase().includes(searchQuery);
+                const matchesStatus = selectedStatus === 'All' || project.status === selectedStatus;
+                return matchesSearch && matchesStatus;
+            });
+
+            renderProjects(filteredProjects);
+        }
+
+        // Initial render
+        renderProjects(clientProjects);
+
+        // Event listeners for search and filter
+        searchInput.addEventListener('input', filterAndSearchProjects);
+        statusFilter.addEventListener('change', filterAndSearchProjects);
+    });
+
+    // Escape HTML to prevent XSS
+    function escapeHTML(html) {
+        const div = document.createElement('div');
+        div.textContent = html;
+        return div.innerHTML;
+    }
+
+    // Get status class for styling
+    function getStatusClass(status) {
+        if (!status) return 'status-pending';
+        switch (status.toLowerCase()) {
+            case 'pending': return 'status-pending';
+            case 'ongoing': return 'status-ongoing';
+            case 'completed': return 'status-completed';
+            default: return 'status-pending';
+        }
+    }
+
+    // View project details in a modal
+    function viewProjectDetails(index) {
+        const projects = JSON.parse(localStorage.getItem("projects")) || [];
+        const project = projects[index];
+        if (!project) return;
+
+        // Safely set the modal fields
+        const modalProjectName = document.getElementById("modalProjectName");
+        const modalProjectDueDate = document.getElementById("modalProjectDueDate");
+        const modalProjectStatus = document.getElementById("modalProjectStatus");
+        const modalProjectDescription = document.getElementById("modalProjectDescription");
+
+        if (modalProjectName) modalProjectName.textContent = project.name || 'N/A';
+        if (modalProjectDueDate) modalProjectDueDate.textContent = project.deadline || 'N/A';
+        if (modalProjectStatus) {
+            modalProjectStatus.textContent =
+                project.status === "Pending" ? "In attesa" :
+                project.status === "Ongoing" ? "In corso" :
+                project.status === "Completed" ? "Completato" : "Sconosciuto";
+        }
+        if (modalProjectDescription) modalProjectDescription.textContent = project.description || 'Nessuna descrizione disponibile.';
+
+        // Show the modal
+        const modal = new bootstrap.Modal(document.getElementById("projectDetailModal"));
+        modal.show();
+    }
+</script>
+

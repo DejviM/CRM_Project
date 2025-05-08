@@ -1,0 +1,508 @@
+﻿@page
+@model CRM_Project.Pages.CRM.Admin.taskMenagmentModel
+@{
+}
+<style>
+    html, body {
+        height: 100%;
+        overflow: auto;
+        background-color: var(--bg-color);
+        color: var(--text-color);
+    }
+
+    :root {
+        --chat-bg: #f5f5f5;
+        --message-bg: #ffffff;
+        --admin-message-bg: #e3f2fd;
+        --worker-message-bg: #e8f5e9;
+        --client-message-bg: #f3e5f5;
+        --message-text: #333333;
+        --message-time: #666666;
+    }
+
+    .dark-mode {
+        --chat-bg: #2d2d2d;
+        --message-bg: #3d3d3d;
+        --admin-message-bg: #1e3a5f;
+        --worker-message-bg: #1a3e1c;
+        --client-message-bg: #4a1a4a;
+        --message-text: #e0e0e0;
+        --message-time: #aaaaaa;
+    }
+
+    .message {
+        max-width: 80%;
+        margin-bottom: 12px;
+        padding: 10px 14px;
+        border-radius: 12px;
+        position: relative;
+        word-wrap: break-word;
+    }
+
+    .message-admin {
+        background-color: var(--admin-message-bg);
+        color: var(--message-text);
+        margin-left: auto;
+        border-bottom-right-radius: 0;
+    }
+
+    .message-worker {
+        background-color: var(--worker-message-bg);
+        color: var(--message-text);
+        margin-right: auto;
+        border-bottom-left-radius: 0;
+    }
+
+    .message-client {
+        background-color: var(--client-message-bg);
+        color: var(--message-text);
+        margin-right: auto;
+        border-bottom-left-radius: 0;
+    }
+
+    .message-time {
+        font-size: 0.75rem;
+        color: var(--message-time);
+        margin-top: 4px;
+        text-align: right;
+    }
+
+    .message-content {
+        margin-bottom: 2px;
+    }
+
+    .message-author {
+        font-weight: bold;
+        margin-bottom: 4px;
+    }
+
+    .empty-chat {
+        height: 100%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: var(--message-time);
+    }
+    .card {
+        background-color: var(--card-bg);
+        color: var(--text-color);
+        border: none;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+    }
+
+    .modal-content {
+        background-color: var(--modal-bg);
+        color: var(--modal-text-color);
+        border: none;
+    }
+
+    .form-select, .form-control {
+        background-color: var(--input-bg);
+        color: var(--text-color);
+        border: 1px solid var(--input-border);
+    }
+
+        .form-select:focus, .form-control:focus {
+            box-shadow: 0 0 0 0.2rem rgba(108, 92, 231, 0.25);
+        }
+
+        .form-control::placeholder {
+            color: var(--text-color);
+        }
+
+    input,
+    textarea,
+    select {
+        background-color: var(--input-bg);
+        color: var(--input-text);
+        border: 1px solid var(--input-border);
+    }
+
+        input:focus,
+        textarea:focus,
+        select:focus {
+            border-color: var(--primary-color);
+            outline: none;
+            box-shadow: 0 0 0 0.2rem rgba(108, 92, 231, 0.25);
+        }
+
+    .table th {
+        background-color: var(--table-header-bg);
+        color: white;
+    }
+
+    .table td {
+        background-color: var(--table-bg);
+        color: var(--table-text-color);
+        border-color: var(--table-border-color);
+    }
+
+    .bg-purple {
+        background-color: #6c5ce7 !important;
+    }
+
+    .btn-purple {
+        background-color: #6c5ce7;
+        color: white;
+    }
+
+        .btn-purple:hover {
+            background-color: #5a4bd8;
+        }
+
+    .dashboard-header {
+        background: linear-gradient(135deg, #6c5ce7, #a29bfe);
+        color: white;
+        padding: 25px 0;
+        margin-bottom: 30px;
+        box-shadow: 0 4px 20px rgba(108, 92, 231, 0.3);
+    }
+</style>
+
+<div class="dashboard-header">
+    <div class="container">
+        <div class="d-flex justify-content-between align-items-center">
+            <div>
+                <h1><i class="fas fa-tasks me-2"></i> Gestione Task</h1>
+                <p class="mb-0">Gestisci tutte le attività e assegnazioni</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="container my-4">
+    <div class="row g-2 align-items-center justify-content-center mb-3">
+        <div class="col-md-3">
+            <select class="form-select border-purple" id="taskStatusFilter">
+                <option value="All">Tutti gli stati</option>
+                <option value="Pending">In attesa</option>
+                <option value="In Progress">In corso</option>
+                <option value="Completed">Completato</option>
+            </select>
+        </div>
+        <div class="col-md-6">
+            <div class="input-group">
+                <span class="input-group-text bg-purple text-white border-0">
+                    <i class="fas fa-search"></i>
+                </span>
+                <input type="text" id="taskSearchInput" class="form-control border-1" placeholder="Cerca per nome attività...">
+            </div>
+        </div>
+
+        <div class="col-md-3 text-end">
+            <a href="/CRM/Admin/Task_Management_F/AddTask" class="btn btn-purple text-white w-100">
+                <i class="fas fa-plus me-1"></i> Aggiungi Attività
+            </a>
+        </div>
+    </div>
+</div>
+
+<div class="card text-light shadow-lg">
+    <div class="card-header bg-purple text-white">
+        <h4 class="mb-0">Panoramica Attività</h4>
+    </div>
+    <div class="table-responsive">
+        <table class="table table-striped table-bordered mb-0">
+            <thead class="table-purple">
+                <tr>
+                    <th>Nome Attività</th>
+                    <th>Progetto</th>
+                    <th>Lavoratore Assegnato</th>
+                    <th>Scadenza</th>
+                    <th>Stato</th>
+                    <th>Azione</th>
+                </tr>
+            </thead>
+            <tbody id="taskTableBody"></tbody>
+        </table>
+    </div>
+    <div class="card-footer d-flex justify-content-end">
+        <ul class="pagination pagination-sm mb-0" id="taskPaginationContainer"></ul>
+    </div>
+</div>
+
+<!-- Comment Modal -->
+<div class="modal fade" id="commentModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header bg-purple text-white">
+                <h5 class="modal-title">Chat del Task</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Chiudi"></button>
+            </div>
+            <div class="modal-body p-0">
+                <div class="d-flex flex-column" style="height: 500px;">
+                    <!-- Chat header with task info -->
+                    <div class="p-3 border-bottom">
+                        <h6 id="commentTaskTitle" class="mb-0"></h6>
+                        <small  id="commentTaskDetails"></small>
+                    </div>
+
+                    <!-- Chat messages area -->
+                    <div id="adminTaskComments" class="flex-grow-1 p-3" style="overflow-y: auto; background-color: var(--chat-bg);">
+                        <!-- Messages will be loaded here -->
+                    </div>
+
+                    <!-- Message input and status change -->
+                    <div class="p-3 border-top">
+                        <div class="input-group mb-2">
+                            <textarea class="form-control" id="adminNewComment" placeholder="Scrivi un messaggio..." rows="1" style="resize: none;"></textarea>
+                            <button class="btn btn-purple text-white" id="adminAddCommentBtn" type="button">
+                                <i class="fas fa-paper-plane"></i>
+                            </button>
+                        </div>
+                        <select class="form-select" id="commentStatusChange">
+                            <option value="">Non cambiare stato</option>
+                            <option value="Pending">Imposta come In attesa</option>
+                            <option value="In Progress">Imposta come In corso</option>
+                            <option value="Completed">Imposta come Completato</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const taskTableBody = document.getElementById("taskTableBody");
+        const taskSearchInput = document.getElementById("taskSearchInput");
+        const taskStatusFilter = document.getElementById("taskStatusFilter");
+        const taskPaginationContainer = document.getElementById("taskPaginationContainer");
+        const commentModalEl = document.getElementById('commentModal');
+        const adminNewCommentInput = document.getElementById("adminNewComment");
+        const commentStatusChange = document.getElementById("commentStatusChange");
+        const adminAddCommentBtn = document.getElementById("adminAddCommentBtn");
+        const adminTaskComments = document.getElementById("adminTaskComments");
+
+        let tasks = JSON.parse(localStorage.getItem("tasks")) || [];
+        const pageSize = 10;
+        let currentPage = 1;
+        let currentTaskIndex = null;
+
+        // Initialize the modal
+        let commentModal = null;
+        if (commentModalEl) {
+            commentModal = new bootstrap.Modal(commentModalEl);
+        }
+
+        // Render the task table
+        function renderTaskTable() {
+            const search = taskSearchInput.value.toLowerCase();
+            const status = taskStatusFilter.value;
+
+            // Filter tasks based on search and status
+            const filteredTasks = tasks.filter(task =>
+                task.title.toLowerCase().includes(search) &&
+                (status === "All" || task.status === status)
+            );
+
+            const totalPages = Math.ceil(filteredTasks.length / pageSize);
+            if (currentPage > totalPages) currentPage = 1;
+
+            const start = (currentPage - 1) * pageSize;
+            const paginatedTasks = filteredTasks.slice(start, start + pageSize);
+
+            // Render tasks in the table
+            taskTableBody.innerHTML = paginatedTasks.map((task, index) => `
+                <tr>
+                    <td>${task.title}</td>
+                    <td>${task.project}</td>
+                    <td>${task.worker}</td>
+                    <td>${task.dueDate}</td>
+                    <td>
+                        <span class="badge ${
+                             task.status === 'Completed' ? 'bg-success' :
+                             task.status === 'In Progress' ? 'bg-warning text-dark' : 'bg-secondary'
+                        }">${
+                            task.status === 'Completed' ? 'Completato' :
+                            task.status === 'In Progress' ? 'In corso' : 'In attesa'
+                        }</span>
+                    </td>
+                    <td>
+                        <div class="btn-group">
+                            <a href="/CRM/Admin/Task_Management_F/EditTask?index=${index}" class="btn btn-sm btn-warning me-1" title="Modifica">
+                                <i class="fas fa-edit"></i>
+                            </a>
+                            <button class="btn btn-sm btn-danger" onclick="deleteTask(${index})" title="Elimina">
+                                <i class="fas fa-trash-alt"></i>
+                            </button>
+                            <button class="btn btn-sm btn-info" onclick="openCommentModal(${index})" title="Commenti">
+                                <i class="fas fa-comment"></i>
+                            </button>
+                        </div>
+                    </td>
+                </tr>
+            `).join("");
+
+            // Render pagination
+            taskPaginationContainer.innerHTML = '';
+            for (let i = 1; i <= totalPages; i++) {
+                const li = document.createElement("li");
+                li.className = `page-item ${i === currentPage ? "active" : ""}`;
+                li.innerHTML = `<a class="page-link" href="#">${i}</a>`;
+                li.querySelector("a").addEventListener("click", (e) => {
+                    e.preventDefault();
+                    currentPage = i;
+                    renderTaskTable();
+                });
+                taskPaginationContainer.appendChild(li);
+            }
+        }
+
+        // Delete a task
+        window.deleteTask = function (index) {
+            if (confirm("Sei sicuro di voler eliminare questa attività?")) {
+                tasks.splice(index, 1);
+                localStorage.setItem("tasks", JSON.stringify(tasks));
+                renderTaskTable();
+            }
+        };
+
+        // Open the comment modal
+        window.openCommentModal = function (index) {
+            currentTaskIndex = index;
+            const task = tasks[index];
+
+            if (!task) return;
+
+            // Set task info in modal
+            document.getElementById("commentTaskTitle").textContent = task.title;
+            document.getElementById("commentTaskDetails").textContent =
+    `Progetto: ${task.project} | Assegnato a: ${task.worker} | Stato: ${
+        task.status === 'Completed' ? 'Completato' :
+        task.status === 'In Progress' ? 'In corso' : 'In attesa'
+    }`;
+
+
+            loadComments(index);
+            if (commentModal) {
+                commentModal.show();
+            }
+        };
+
+        // Load comments for a task
+        function loadComments(index) {
+            const task = tasks[index];
+            if (!task) return;
+
+            const comments = task.comments || [];
+
+            if (comments.length === 0) {
+                adminTaskComments.innerHTML = '<div class="empty-chat">Nessun messaggio ancora</div>';
+                return;
+            }
+
+            adminTaskComments.innerHTML = comments.map(comment => `
+                <div class="message ${getMessageClass(comment.role)}">
+                    <div class="message-author">${comment.author}</div>
+                    <div class="message-content">${comment.text}</div>
+                    <div class="message-time">${formatCommentDate(comment.date)}</div>
+                </div>
+            `).join("");
+
+            // Scroll to bottom
+            adminTaskComments.scrollTop = adminTaskComments.scrollHeight;
+        }
+
+        // Helper function to get message class based on role
+        function getMessageClass(role) {
+            switch(role) {
+                case 'admin': return 'message-admin';
+                case 'worker': return 'message-worker';
+                case 'client': return 'message-client';
+                default: return 'message-worker';
+            }
+        }
+
+        // Helper function to format comment date
+        function formatCommentDate(dateString) {
+            const date = new Date(dateString);
+            return date.toLocaleString('it-IT', {
+                day: '2-digit',
+                month: '2-digit',
+                year: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit'
+            });
+        }
+
+        // Add a comment or update task status
+        adminAddCommentBtn.addEventListener("click", () => {
+            const commentText = adminNewCommentInput.value.trim();
+            const statusChange = commentStatusChange.value;
+
+            if (!commentText && !statusChange) {
+                alert("Inserisci un commento o seleziona un cambio di stato");
+                return;
+            }
+
+            const task = tasks[currentTaskIndex];
+            if (!task) {
+                alert("Attività non trovata");
+                return;
+            }
+
+            // Update task status if changed
+            if (statusChange) {
+                task.status = statusChange;
+                task.updatedAt = new Date().toISOString();
+                tasks[currentTaskIndex] = task;
+                localStorage.setItem("tasks", JSON.stringify(tasks));
+            }
+
+            // Add comment if provided
+            if (commentText) {
+                if (!task.comments) {
+                    task.comments = [];
+                }
+
+                task.comments.push({
+                    author: "Admin",
+                    role: "admin",
+                    text: commentText,
+                    date: new Date().toISOString()
+                });
+
+                localStorage.setItem("tasks", JSON.stringify(tasks));
+                adminNewCommentInput.value = "";
+            }
+
+            // Reload comments and update task info
+            loadComments(currentTaskIndex);
+            document.getElementById("commentTaskDetails").textContent =
+    `Progetto: ${task.project} | Assegnato a: ${task.worker} | Stato: ${
+        task.status === 'Completed' ? 'Completato' :
+        task.status === 'In Progress' ? 'In corso' : 'In attesa'
+    }`;
+
+
+            // If we changed status, refresh the main table
+            if (statusChange) {
+                renderTaskTable();
+            }
+        });
+
+        // Handle Enter key in comment input
+        adminNewCommentInput.addEventListener("keypress", function(e) {
+            if (e.key === "Enter" && !e.shiftKey) {
+                e.preventDefault();
+                adminAddCommentBtn.click();
+            }
+        });
+
+        // Event listeners for search and filter
+        taskSearchInput.addEventListener("input", () => {
+            currentPage = 1;
+            renderTaskTable();
+        });
+
+        taskStatusFilter.addEventListener("change", () => {
+            currentPage = 1;
+            renderTaskTable();
+        });
+
+        // Initial render
+        renderTaskTable();
+    });
+</script>

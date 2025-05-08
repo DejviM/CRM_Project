@@ -1,0 +1,228 @@
+﻿@page
+@model CRM_Project.Pages.CRM.Client.TaskManagment_C.EditTask_CModel
+@{
+}
+<style>
+    html, body {
+        height: 100%;
+        overflow: auto;
+        background-color: var(--bg-color);
+        color: var(--text-color);
+    }
+
+    .compact-form-container {
+        max-width: 600px;
+        margin: 2rem auto;
+        padding: 1.5rem;
+        background-color: var(--card-bg);
+        border-radius: 8px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    }
+
+    .compact-form-group {
+        margin-bottom: 0.75rem;
+    }
+
+    .compact-form-label {
+        font-size: 0.85rem;
+        margin-bottom: 0.25rem;
+        display: block;
+        color: var(--text-color);
+    }
+
+    .compact-form-control {
+        padding: 0.35rem 0.5rem;
+        font-size: 0.85rem;
+        height: calc(1.5em + 0.5rem + 2px);
+        width: 50%;
+        background-color: var(--input-bg);
+        color: var(--input-text);
+        border: 1px solid var(--input-border);
+        border-radius: 4px;
+    }
+
+    .compact-form-select {
+        padding: 0.35rem 0.5rem;
+        font-size: 0.85rem;
+        height: calc(1.5em + 0.5rem + 2px);
+        background-color: var(--input-bg);
+        color: var(--input-text);
+        border: 1px solid var(--input-border);
+        border-radius: 4px;
+    }
+
+    .compact-textarea {
+        min-height: 60px;
+        min-width: 100%;
+        padding: 0.5rem;
+        font-size: 0.85rem;
+        background-color: var(--input-bg);
+        color: var(--input-text);
+        border: 1px solid var(--input-border);
+        border-radius: 4px;
+    }
+
+    .compact-btn {
+        padding: 0.35rem 1rem;
+        font-size: 0.85rem;
+        background-color: #6c5ce7;
+        color: white;
+        border: none;
+        border-radius: 4px;
+    }
+
+        .compact-btn:hover {
+            background-color: #5a4bd8;
+        }
+
+    .btn-secondary {
+        background-color: #6c757d;
+    }
+
+    .form-title {
+        font-size: 1.25rem;
+        margin-bottom: 1.5rem;
+        text-align: center;
+        color: var(--text-color);
+    }
+</style>
+
+<div class="container">
+    <div class="compact-form-container">
+        <h5 class="form-title"><i class="fas fa-edit me-2"></i>Modifica Compito</h5>
+
+        <form id="editTaskForm">
+            <div class="compact-form-group">
+                <label class="compact-form-label">Titolo *</label>
+                <input type="text" class="compact-form-control" id="taskTitle" required>
+            </div>
+
+            <div class="compact-form-group">
+                <label class="compact-form-label">Descrizione</label>
+                <textarea class="compact-textarea" id="taskDescription"></textarea>
+            </div>
+
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="compact-form-group">
+                        <label class="compact-form-label">Progetto *</label>
+                        <select class="compact-form-select" id="taskProject" required>
+                            <option value="" selected disabled>Seleziona Progetto</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="compact-form-group">
+                        <label class="compact-form-label">Scadenza *</label>
+                        <input type="date" class="compact-form-control" id="taskDueDate" required>
+                    </div>
+                </div>
+            </div>
+
+            <div class="compact-form-group">
+                <label class="compact-form-label">Stato *</label>
+                <select class="compact-form-select" id="taskStatus" required>
+                    <option value="Pending">In attesa</option>
+                    <option value="In Progress">In corso</option>
+                    <option value="Completed">Completato</option>
+                </select>
+            </div>
+
+            <div class="d-grid gap-2 mt-4">
+                <button type="submit" class="compact-btn">
+                    <i class="fas fa-save me-1"></i> Salva Modifiche
+                </button>
+                <button type="button" class="btn btn-warning" onclick="window.history.back()">
+                    <i class="fas fa-times me-1"></i> Annulla
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        // Safely retrieve and parse currentUser from localStorage
+        let currentUser = null;
+        try {
+            currentUser = JSON.parse(localStorage.getItem('currentUser')) || JSON.parse(sessionStorage.getItem('currentUser'));
+        } catch (error) {
+            console.error('Error parsing currentUser:', error);
+        }
+        console.log("Logged-in client:", currentUser.name);
+
+
+         const loggedInClientName = `${currentUser.name || 'Unknown'}`;
+        console.log("Logged-in client:", loggedInClientName);
+
+        const urlParams = new URLSearchParams(window.location.search);
+        const taskIndex = urlParams.get('index');
+        const tasks = JSON.parse(localStorage.getItem('tasks')) || [];
+        const task = tasks[taskIndex];
+
+        if (!task) {
+            alert('Errore: Compito non trovato.');
+            window.history.back();
+            return;
+        }
+
+        // Populate form fields
+        document.getElementById('taskTitle').value = task.title || '';
+        document.getElementById('taskDueDate').value = task.dueDate || '';
+        document.getElementById('taskStatus').value = task.status || 'Pending';
+        document.getElementById('taskDescription').value = task.description || '';
+
+        const projectDropdown = document.getElementById('taskProject');
+
+        // Get projects from localStorage
+        const projects = JSON.parse(localStorage.getItem('projects')) || [];
+        console.log("Projects in localStorage:", projects);
+
+        // Filter projects by the logged-in client's name
+        const clientProjects = projects.filter(project => project.client === loggedInClientName);
+        console.log("Filtered projects for client:", clientProjects);
+
+        // Populate the dropdown with the filtered projects
+        if (clientProjects.length > 0) {
+            clientProjects.forEach(project => {
+                const option = document.createElement('option');
+                option.value = project.name;
+                option.textContent = project.name;
+                projectDropdown.appendChild(option);
+            });
+        } else {
+            // If no projects are found, show a placeholder option
+            const option = document.createElement('option');
+            option.value = '';
+            option.textContent = 'Nessun progetto disponibile';
+            option.disabled = true;
+            option.selected = true;
+            projectDropdown.appendChild(option);
+        }
+
+        projectDropdown.value = task.project || '';
+
+        // Handle form submission
+        document.getElementById('editTaskForm').addEventListener('submit', function (e) {
+            e.preventDefault();
+
+            // Update the task with new values
+            const updatedTask = {
+                title: document.getElementById('taskTitle').value,
+                project: document.getElementById('taskProject').value,
+                dueDate: document.getElementById('taskDueDate').value,
+                status: document.getElementById('taskStatus').value,
+                description: document.getElementById('taskDescription').value
+            };
+
+            // Save the updated task back to localStorage
+            tasks[taskIndex] = updatedTask;
+            localStorage.setItem('tasks', JSON.stringify(tasks));
+
+            // Redirect back to the task list page
+            window.location.href = '/CRM/Client/task_C';
+        });
+    });
+
+
+</script>

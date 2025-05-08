@@ -1,0 +1,108 @@
+html {
+  font-size: 14px;
+}
+
+@media (min-width: 768px) {
+  html {
+    font-size: 16px;
+  }
+}
+
+.btn:focus, .btn:active:focus, .btn-link.nav-link:focus, .form-control:focus, .form-check-input:focus {
+  box-shadow: 0 0 0 0.1rem white, 0 0 0 0.25rem #258cfb;
+}
+
+html, body {
+    height: 100%;
+    overflow: auto; 
+}
+
+body {
+  margin-bottom: 60px;
+}
+
+.form-floating > .form-control-plaintext::placeholder, .form-floating > .form-control::placeholder {
+  color: var(--bs-secondary-color);
+  text-align: end;
+}
+
+.form-floating > .form-control-plaintext:focus::placeholder, .form-floating > .form-control:focus::placeholder {
+  text-align: start;
+}
+
+
+/*--------------------LOGIN PAGE CSS-------------------------*/
+:root {
+    /* General Colors - Light Theme */
+    --primary-color: #6c5ce7;
+    --secondary-color: #a29bfe;
+    --success-color: #00b894;
+    --info-color: #0984e3;
+    --danger-color: #d63031;
+    --bg-color: #f5f7fb;
+    --text-color: #2d3436;
+    --card-bg: #ffffff;
+    --muted-text: #636e72;
+    --input-bg: #ffffff;
+    --input-text: #2d3436;
+    --input-border: #ced4da;
+    --modal-bg: #ffffff;
+    --modal-text-color: #2d3436;
+    --table-header-bg: #32174d;
+    --table-bg: #ffffff;
+    --table-border-color: #2e003e;
+    --table-text-color: #1e1e1e;
+    --badge-working-bg: #00e67620;
+    --badge-working-color: #00e676;
+    --badge-dayoff-bg: #ff525220;
+    --badge-dayoff-color: #ff5252;
+    --hover-bg: rgba(108, 92, 231, 0.1);
+    --dropdown-bg: #ffffff;
+    --dropdown-text: #2d3436;
+    --dropdown-hover-bg: #eeeeee;
+}
+
+body.dark-mode {
+    --bg-color: #1a1a2e;
+    --text-color: #f5f5f5;
+    --card-bg: rgba(255, 255, 255, 0.08);
+    --muted-text: #ccc;
+    --input-bg: #2a2a40;
+    --input-text: #ffffff;
+    --input-border: #444;
+    --modal-bg: #2a2a40;
+    --modal-text-color: #f5f5f5;
+    --table-header-bg: #32174d;
+    --table-bg: #1b1b1b;
+    --table-border-color: #2e003e;
+    --table-text-color: #e0e0e0;
+    --badge-working-bg: #00e67630;
+    --badge-working-color: #00e676;
+    --badge-dayoff-bg: #ff525230;
+    --badge-dayoff-color: #ff5252;
+    --hover-bg: rgba(108, 92, 231, 0.2);
+    --dropdown-bg: #1f1f1f;
+    --dropdown-text: #ffffff;
+    --dropdown-hover-bg: #343a40;
+}
+
+
+body {
+    background-color: var(--bg-color); /* corrected */
+    color: var(--text-color);
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+#themeToggle {
+    border-color: var(--primary-color);
+    color: var(--primary-color);
+    background-color: transparent;
+}
+
+    #themeToggle:hover {
+        background-color: var(--primary-color);
+        color: #fff;
+    }
+
+/*-----------------------END LOGIN CSS-----------------------*/

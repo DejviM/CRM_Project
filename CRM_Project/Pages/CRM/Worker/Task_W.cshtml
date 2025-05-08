@@ -1,0 +1,461 @@
+﻿@page
+@model CRM_Project.Pages.CRM.Worker.IndexModel
+@{
+}
+
+<style>
+    html, body {
+        height: 100%;
+        overflow: auto;
+        background-color: var(--bg-color);
+        color: var(--text-color);
+    }
+
+    :root {
+        --chat-bg: #f5f5f5;
+        --message-bg: #ffffff;
+        --admin-message-bg: #e3f2fd;
+        --worker-message-bg: #e8f5e9;
+        --message-text: #333333;
+        --message-time: #666666;
+    }
+
+    .dark-mode {
+        --chat-bg: #2d2d2d;
+        --message-bg: #3d3d3d;
+        --admin-message-bg: #1e3a5f;
+        --worker-message-bg: #1a3e1c;
+        --message-text: #e0e0e0;
+        --message-time: #aaaaaa;
+    }
+
+    .message {
+        max-width: 80%;
+        margin-bottom: 12px;
+        padding: 10px 14px;
+        border-radius: 12px;
+        position: relative;
+        word-wrap: break-word;
+    }
+
+    .message-admin {
+        background-color: var(--admin-message-bg);
+        color: var(--message-text);
+        margin-left: auto;
+        border-bottom-right-radius: 0;
+    }
+
+    .message-worker {
+        background-color: var(--worker-message-bg);
+        color: var(--message-text);
+        margin-right: auto;
+        border-bottom-left-radius: 0;
+    }
+
+    .message-time {
+        font-size: 0.75rem;
+        color: var(--message-time);
+        margin-top: 4px;
+        text-align: right;
+    }
+
+    .message-content {
+        margin-bottom: 2px;
+    }
+
+    .message-author {
+        font-weight: bold;
+        margin-bottom: 4px;
+    }
+
+    .form-select, .form-control {
+        background-color: var(--input-bg);
+        color: var(--text-color);
+        border: 1px solid var(--input-border);
+    }
+
+        .form-select:focus, .form-control:focus {
+            box-shadow: 0 0 0 0.2rem rgba(108, 92, 231, 0.25);
+        }
+
+        .form-control::placeholder {
+            color: var(--text-color);
+        }
+
+    input,
+    textarea,
+    select {
+        background-color: var(--input-bg);
+        color: var(--input-text);
+        border: 1px solid var(--input-border);
+    }
+
+        input:focus,
+        textarea:focus,
+        select:focus {
+            border-color: var(--primary-color);
+            outline: none;
+            box-shadow: 0 0 0 0.2rem rgba(108, 92, 231, 0.25);
+        }
+
+    .table th {
+        background-color: var(--table-header-bg);
+        color: white;
+        border-color: var(--text-color);
+    }
+
+    .table td {
+        background-color: var(--table-bg);
+        color: var(--table-text-color);
+        border-color: var(--text-color);
+    }
+
+    .modal-content {
+        background-color: var(--modal-bg);
+        color: var(--modal-text-color);
+        border: none;
+    }
+
+    .dashboard-header {
+        background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+        color: white;
+        padding: 25px 0;
+        margin-bottom: 30px;
+        box-shadow: 0 4px 20px rgba(108, 92, 231, 0.3);
+    }
+
+    .card {
+        background-color: var(--card-bg);
+        color: var(--text-color);
+        border: none;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+    }
+
+    .badge {
+        font-size: 0.85em;
+        padding: 5px 8px;
+    }
+
+    .btn-purple {
+        background-color: #6c5ce7;
+        color: white;
+    }
+
+        .btn-purple:hover {
+            background-color: #5a4bd8;
+        }
+
+    .bg-purple {
+        background-color: #6c5ce7;
+    }
+
+</style>
+
+<div class="dashboard-header p-4 bg-primary mb-4 shadow">
+    <div class="container">
+        <h1><i class="fas fa-tasks me-2"></i> I Miei Task</h1>
+        <p>Gestisci i task assegnati</p>
+    </div>
+</div>
+
+<div class="container mb-4">
+    <div class="row g-2">
+        <div class="col-md-3">
+            <select class="form-select border-light" id="statusFilter">
+                <option value="All">Tutti gli stati</option>
+                <option value="Pending">In attesa</option>
+                <option value="In Progress">In corso</option>
+                <option value="Completed">Completati</option>
+            </select>
+        </div>
+        <div class="col-md-6">
+            <div class="input-group">
+                <span class="input-group-text bg-purple text-white border-0">
+                    <i class="fas fa-search"></i>
+                </span>
+                <input type="text" id="taskSearch" class="form-control border-1" placeholder="Cerca task...">
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="container">
+    <div class="card shadow-lg">
+        <div class="card-header bg-purple">
+            <h4 class="mb-0">Panoramica Task</h4>
+        </div>
+        <div class="table-responsive">
+            <table class="table table-bordered table-hover mb-0">
+                <thead class="table-primary text-dark">
+                    <tr>
+                        <th>Titolo</th>
+                        <th>Progetto</th>
+                        <th>Priorità</th>
+                        <th>Scadenza</th>
+                        <th>Stato</th>
+                        <th>Azioni</th>
+                    </tr>
+                </thead>
+                <tbody id="taskTableBody"></tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- Modale Commenti -->
+<div class="modal fade" id="commentModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header bg-primary text-white">
+                <h5 class="modal-title">Chat del Task</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Chiudi"></button>
+            </div>
+            <div class="modal-body p-0">
+                <div class="d-flex flex-column" style="height: 400px;">
+                    <!-- Chat header -->
+                    <div class="p-3 border-bottom">
+                        <h6 id="commentTaskTitle" class="mb-0"></h6>
+                        <small id="commentTaskDetails"></small>
+                    </div>
+
+                    <!-- Chat messages -->
+                    <div id="taskComments" class="flex-grow-1 p-3" style="overflow-y: auto; background-color: var(--chat-bg);">
+                        <!-- Messages will be loaded here -->
+                    </div>
+
+                    <!-- Message input -->
+                    <div class="p-3 border-top">
+                        <div class="input-group">
+                            <textarea class="form-control" id="newComment" placeholder="Scrivi un messaggio..." rows="1" style="resize: none;"></textarea>
+                            <button class="btn btn-primary" id="addCommentBtn" type="button">
+                                <i class="fas fa-paper-plane"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modale Dettagli Task -->
+<div class="modal fade" id="taskDetailModal" tabindex="-1" aria-labelledby="taskDetailModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header bg-primary ">
+                <h5 class="modal-title" id="taskDetailModalLabel">Dettagli Task</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Chiudi"></button>
+            </div>
+            <div class="modal-body">
+                <p><strong>Titolo:</strong> <span id="modalTitle"></span></p>
+                <p><strong>Descrizione:</strong> <span id="modalDescription"></span></p>
+                <p><strong>Progetto:</strong> <span id="modalProject"></span></p>
+                <p><strong>Priorità:</strong> <span id="modalPriority"></span></p>
+                <p><strong>Scadenza:</strong> <span id="modalDueDate"></span></p>
+                <p><strong>Stato:</strong> <span id="modalStatus" class="badge"></span></p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-success" id="markCompleteBtn">Segna come Completato</button>
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Chiudi</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const currentUser = JSON.parse(localStorage.getItem('currentUser')) || JSON.parse(sessionStorage.getItem('currentUser'));
+
+
+        const tasks = JSON.parse(localStorage.getItem('tasks')) || [];
+        let currentTaskIndex = null;
+
+        // Function to load comments for a task
+        function loadComments(index) {
+        const task = tasks[index];
+        const taskCommentsContainer = document.getElementById("taskComments");
+        if (!task || !taskCommentsContainer) return;
+
+        const comments = task.comments || [];
+        if (comments.length === 0) {
+            taskCommentsContainer.innerHTML = `<div class="text-center py-4 text-muted">Nessun messaggio ancora</div>`;
+            return;
+        }
+
+        taskCommentsContainer.innerHTML = comments.map(comment => `
+            <div class="message ${comment.role === 'admin' ? 'message-admin' : 'message-worker'}">
+                <div class="message-author">${comment.author}</div>
+                <div class="message-content">${comment.text}</div>
+                <div class="message-time">${comment.date}</div>
+            </div>
+        `).join("");
+        // Scroll to bottom
+        taskCommentsContainer.scrollTop = taskCommentsContainer.scrollHeight;
+    }
+
+
+        // Function to handle adding a new comment
+        document.getElementById("addCommentBtn").addEventListener("click", function () {
+            const newCommentInput = document.getElementById("newComment");
+            if (!newCommentInput || currentTaskIndex === null) return;
+
+            const newCommentText = newCommentInput.value.trim();
+            if (!newCommentText) {
+                alert("Please enter a comment before submitting.");
+                return;
+            }
+
+            const task = tasks[currentTaskIndex];
+            if (!task.comments) {
+                task.comments = [];
+            }
+
+            const newComment = {
+                author: `${currentUser.name}`,
+                role: "worker",
+                text: newCommentText,
+                date: new Date().toLocaleString()
+            };
+
+            task.comments.push(newComment);
+            localStorage.setItem("tasks", JSON.stringify(tasks));
+
+            newCommentInput.value = "";
+            loadComments(currentTaskIndex);
+        });
+
+        // Function to open the comment modal
+        window.openCommentModal = function (index) {
+            currentTaskIndex = index;
+            const task = tasks[index];
+            if (!task) return;
+
+            document.getElementById("commentTaskTitle").textContent = task.title;
+            document.getElementById("commentTaskDetails").textContent = `Project: ${task.project} | Deadline: ${task.dueDate} | Status: ${task.status}`;
+            loadComments(index);
+
+            const commentModal = new bootstrap.Modal(document.getElementById('commentModal'));
+            commentModal.show();
+        };
+
+        // Function to open the task details modal
+        window.openTaskModal = function (index) {
+            currentTaskIndex = index;
+            const task = tasks[index];
+            if (!task) return;
+
+            // Populate the modal with task details
+            document.getElementById("modalTitle").textContent = task.title;
+            document.getElementById("modalDescription").textContent = task.description || 'No description available';
+            document.getElementById("modalProject").textContent = task.project;
+            document.getElementById("modalPriority").textContent = task.priority;
+            document.getElementById("modalDueDate").textContent = task.dueDate;
+
+            const modalStatus = document.getElementById("modalStatus");
+            const statusTranslations = {
+                "Completed": "Completato",
+                "In Progress": "In corso",
+                "Pending": "In attesa"
+            };
+
+            const italianStatus = statusTranslations[task.status] || "Sconosciuto"; // Fallback
+
+                modalStatus.textContent = italianStatus;
+
+                modalStatus.className = `badge ${
+                    italianStatus === 'Completato' ? 'bg-success' :
+                    italianStatus === 'In corso' ? 'bg-warning text-dark' :
+                    'bg-secondary'
+                }`;
+
+            // Show the modal
+            const taskDetailModal = new bootstrap.Modal(document.getElementById('taskDetailModal'));
+            taskDetailModal.show();
+        };
+
+        // Add event listener for "Segna come Completato" button
+        document.getElementById("markCompleteBtn").addEventListener("click", function () {
+            if (currentTaskIndex === null) return;
+
+            const task = tasks[currentTaskIndex];
+            if (!task) return;
+
+            // Update the task status to "Completed"
+            task.status = "Completed";
+
+            // Save the updated tasks array to localStorage
+            localStorage.setItem("tasks", JSON.stringify(tasks));
+
+            // Refresh the task list
+            renderTasks();
+
+            // Close the modal
+            const taskDetailModal = bootstrap.Modal.getInstance(document.getElementById('taskDetailModal'));
+            taskDetailModal.hide();
+        });
+
+        // Function to render tasks
+        function renderTasks() {
+            const taskTableBody = document.getElementById("taskTableBody");
+            if (!taskTableBody) return;
+
+            const search = document.getElementById("taskSearch")?.value.toLowerCase() || '';
+            const status = document.getElementById("statusFilter")?.value || 'All';
+
+            // Filter tasks assigned to the current worker
+            const filteredTasks = tasks.filter(task =>
+                task.worker && task.worker.trim() === currentUser.name.trim() &&
+                (status === "All" || task.status === status) &&
+                (task.title.toLowerCase().includes(search) ||
+                 (task.description && task.description.toLowerCase().includes(search)) ||
+                 (task.project && task.project.toLowerCase().includes(search)))
+            );
+
+            if (filteredTasks.length === 0) {
+                taskTableBody.innerHTML = `
+                    <tr>
+                        <td colspan="6" class="text-center">Nessun task trovato.</td>
+                    </tr>
+                `;
+                return;
+            }
+
+            // Render tasks in the table
+            taskTableBody.innerHTML = filteredTasks.map((task, index) => `
+                <tr>
+                    <td>${task.title}</td>
+                    <td>${task.project}</td>
+                    <td><span class="badge ${
+                        task.priority === 'Alta' ? 'bg-danger' :
+                        task.priority === 'Media' ? 'bg-warning text-dark' : 'bg-info'
+                    }">${task.priority}</span></td>
+                    <td>${task.dueDate}</td>
+    <td><span class="badge ${
+        task.status === 'Completed' ? 'bg-success' :
+        task.status === 'In Progress' ? 'bg-primary' : 'bg-secondary'
+    }">${
+        task.status === 'Completed' ? 'Completato' :
+        task.status === 'In Progress' ? 'In corso' : 'In attesa'
+    }</span></td>
+
+                    <td>
+                        <button class="btn btn-sm btn-info me-1" onclick="openCommentModal(${index})">
+                            <i class="fas fa-comment"></i> Commenti
+                        </button>
+                        <button class="btn btn-sm btn-secondary" onclick="openTaskModal(${index})">
+                            <i class="fas fa-info-circle"></i> Dettagli
+                        </button>
+                    </td>
+                </tr>
+            `).join("");
+        }
+
+        // Add event listeners for search and filter
+        document.getElementById("taskSearch").addEventListener("input", renderTasks);
+        document.getElementById("statusFilter").addEventListener("change", renderTasks);
+
+        // Initial render
+        renderTasks();
+    });
+</script>
+
