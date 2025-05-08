@@ -413,7 +413,6 @@
 
                 // Update projects where user is owner or team member
                 projects.forEach(project => {
-                    // Update if user is owner
                     if (project.ownerName === oldFullName) {
                         project.ownerName = newFullName;
                     }

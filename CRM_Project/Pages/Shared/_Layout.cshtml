@@ -43,7 +43,6 @@
             transition: padding-left 0.3s ease;
         }
 
-        /* Hide padding when sidebar is toggled on small screens */
         @@media (max-width: 991px) {
             .main-body {
                 padding-left: 0 !important;
@@ -59,7 +58,6 @@
                 #sidebar.active {
                     transform: translateX(0);
                 }
-                    /* Show overlay only when sidebar is open */
                     #sidebar.active + #overlay {
                         display: block;
                     }
@@ -93,7 +91,6 @@
                 text-align: center;
             }
 
-        /* Background overlay for mobile */
         #overlay {
             display: none;
             position: fixed;
@@ -109,12 +106,10 @@
             border-radius: 4px;
         }
 
-        /* Role-specific sections - hidden by default */
         .admin-only, .worker-only, .utente-only {
             display: none;
         }
 
-        /* Theme toggle button */
         #themeToggle {
             border-color: var(--primary-color);
             color: var(--primary-color);
@@ -128,7 +123,6 @@
     </style>
 </head>
 <body class="main-body">
-    <!-- Hamburger + Sidebar Wrapper -->
     <header class="d-flex">
         <!-- Toggle Button (Mobile) -->
         <button class="btn btn-outline-dark d-lg-none position-fixed top-0 start-0 m-3 z-3" id="menu-toggle">

@@ -88,7 +88,7 @@ body.dark-mode {
 
 
 body {
-    background-color: var(--bg-color); /* corrected */
+    background-color: var(--bg-color);
     color: var(--text-color);
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     transition: background-color 0.3s ease, color 0.3s ease;
@@ -105,4 +105,3 @@ body {
         color: #fff;
     }
 
-/*-----------------------END LOGIN CSS-----------------------*/

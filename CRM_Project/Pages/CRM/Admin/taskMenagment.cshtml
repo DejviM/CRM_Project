@@ -191,7 +191,7 @@
 
         <div class="col-md-3 text-end">
             <a href="/CRM/Admin/Task_Management_F/AddTask" class="btn btn-purple text-white w-100">
-                <i class="fas fa-plus me-1"></i> Aggiungi Attività
+                <i class="fas fa-plus me-1"></i> Aggiungi Task
             </a>
         </div>
     </div>
@@ -250,12 +250,6 @@
                                 <i class="fas fa-paper-plane"></i>
                             </button>
                         </div>
-                        <select class="form-select" id="commentStatusChange">
-                            <option value="">Non cambiare stato</option>
-                            <option value="Pending">Imposta come In attesa</option>
-                            <option value="In Progress">Imposta come In corso</option>
-                            <option value="Completed">Imposta come Completato</option>
-                        </select>
                     </div>
                 </div>
             </div>
@@ -381,7 +375,6 @@
             }
         };
 
-        // Load comments for a task
         function loadComments(index) {
             const task = tasks[index];
             if (!task) return;
@@ -401,7 +394,6 @@
                 </div>
             `).join("");
 
-            // Scroll to bottom
             adminTaskComments.scrollTop = adminTaskComments.scrollHeight;
         }
 
@@ -427,7 +419,6 @@
             });
         }
 
-        // Add a comment or update task status
         adminAddCommentBtn.addEventListener("click", () => {
             const commentText = adminNewCommentInput.value.trim();
             const statusChange = commentStatusChange.value;

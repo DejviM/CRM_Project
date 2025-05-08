@@ -130,7 +130,7 @@
             const container = document.getElementById("workerProjects");
             if (!container) return;
 
-            if (!currentUser || currentUser.role !== 'worker') { // Updated to check 'role' instead of 'Ruolo'
+            if (!currentUser || currentUser.role !== 'worker') { 
                 const errorMsg = !currentUser ?
                 'Nessun utente ha effettuato laccesso. Effettua il login.' :
 
@@ -176,7 +176,7 @@
                     </div>
                 `;
             } else {
-                container.innerHTML = ''; // Clear previous content
+                container.innerHTML = ''; 
 
                 groupedTasks.forEach(projectData => {
                     const project = projectData.project;

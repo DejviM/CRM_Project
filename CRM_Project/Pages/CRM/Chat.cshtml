@@ -296,7 +296,6 @@
 
         // Filter based on current user's role
         contacts = allUsers.filter(user => {
-            // Don't show current user in contacts
             if (user.id === currentUser.id) return false;
 
             // Admin can chat with workers and clients

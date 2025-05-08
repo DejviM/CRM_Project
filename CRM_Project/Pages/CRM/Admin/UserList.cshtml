@@ -394,7 +394,7 @@
 
                     const currentUser = JSON.parse(localStorage.getItem('currentUser'));
                     if (currentUser && currentUser.id == currentEditingUserId && newRole !== 'admin') {
-                        currentUser.role = newRole;  // Add this line
+                        currentUser.role = newRole;
                         localStorage.removeItem('currentUser');
                         alert('You changed your own role. Please login again.');
                         window.location.href = '/CRM/Login';

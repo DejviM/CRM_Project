@@ -340,9 +340,9 @@
         }
 
             .admin-notes-list .list-group-item {
-                background-color: transparent; /* Inherit from parent or look seamless */
+                background-color: transparent; 
                 color: var(--text-color);
-                border-color: var(--input-border); /* Optional */
+                border-color: var(--input-border); 
             }
 
     </style>
@@ -406,7 +406,6 @@
 
     <!-- ADMIN DASHBOARD -->
     <div class="container mt-4 admin-only">
-        <!-- Quick Stats Row -->
         <div class="row">
             <!-- New Projects Card -->
             <div class="col-xl-4 col-lg-6 mb-3">
@@ -894,8 +893,7 @@
                 return;
             }
 
-            // Use the name directly to match the worker in tasks
-            const fullName = loggedInWorker.name; // Assuming name is a single string (e.g., "User2333 User2333")
+            const fullName = loggedInWorker.name; 
 
             if (!fullName) {
                 console.error("Current user has no name defined.");
@@ -1100,7 +1098,6 @@
 
         // Role Detection and Dashboard Setup
         function setupDashboard() {
-            // Get user session from localStorage or sessionStorage
             const currentUser = JSON.parse(localStorage.getItem('currentUser')) ||
                               JSON.parse(sessionStorage.getItem('currentUser'));
 
@@ -1112,7 +1109,7 @@
                 return;
             }
 
-            const userRole = currentUser.role || currentUser.Ruolo; // Check both possible property names
+            const userRole = currentUser.role || currentUser.Ruolo; 
             console.log('User role:', userRole);
 
             // Hide all role-specific sections by default

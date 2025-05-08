@@ -337,7 +337,7 @@
                             id: user.id,
                             name: `${user.Nome} ${user.Cognome}`,
                             email: user.email,
-                            role: user.Ruolo, // Using 'Ruolo' from user object
+                            role: user.Ruolo, 
                             photo: user.photo
                         };
 
@@ -375,7 +375,6 @@
                 this.classList.add('was-validated');
             });
 
-            // Registration form submission handler
 
         document.getElementById('registerForm').addEventListener('submit', function(e) {
             e.preventDefault();
@@ -403,7 +402,7 @@
                     Ruolo: "user", // Default role is "user"
                     creatoA: new Date().toISOString().split('T')[0],
                     photo: "/css/image/pfp.jpg",
-                    isProtected: false // Important: Mark as not protected
+                    isProtected: false 
                 };
 
                 let users = JSON.parse(localStorage.getItem('users')) || [];
