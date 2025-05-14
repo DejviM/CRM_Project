@@ -421,7 +421,6 @@
 
         adminAddCommentBtn.addEventListener("click", () => {
             const commentText = adminNewCommentInput.value.trim();
-            const statusChange = commentStatusChange.value;
 
             if (!commentText && !statusChange) {
                 alert("Inserisci un commento o seleziona un cambio di stato");
@@ -434,13 +433,6 @@
                 return;
             }
 
-            // Update task status if changed
-            if (statusChange) {
-                task.status = statusChange;
-                task.updatedAt = new Date().toISOString();
-                tasks[currentTaskIndex] = task;
-                localStorage.setItem("tasks", JSON.stringify(tasks));
-            }
 
             // Add comment if provided
             if (commentText) {
@@ -461,17 +453,9 @@
 
             // Reload comments and update task info
             loadComments(currentTaskIndex);
-            document.getElementById("commentTaskDetails").textContent =
-    `Progetto: ${task.project} | Assegnato a: ${task.worker} | Stato: ${
-        task.status === 'Completed' ? 'Completato' :
-        task.status === 'In Progress' ? 'In corso' : 'In attesa'
-    }`;
 
 
-            // If we changed status, refresh the main table
-            if (statusChange) {
-                renderTaskTable();
-            }
+
         });
 
         // Handle Enter key in comment input

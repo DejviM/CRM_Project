@@ -209,8 +209,11 @@
 
         const projects = JSON.parse(localStorage.getItem("projects")) || [];
         const tasks = JSON.parse(localStorage.getItem("tasks")) || [];
+            console.log("Projects:", projects);
+    console.log("Tasks:", tasks);
 
-        const clientProjects = projects.filter(project => project.client === loggedInClientName);
+
+          const clientProjects = projects.filter(project => project.client === loggedInClientName);
         const clientProjectNames = clientProjects.map(project => project.name);
         const clientTasks = tasks.filter(task => clientProjectNames.includes(task.project));
 
@@ -224,7 +227,7 @@
                     </tr>
                 `;
             } else {
-                container.innerHTML = ''; /
+                container.innerHTML = ''; 
                 filteredTasks.forEach((task, index) => {
                     container.innerHTML += `
                         <tr>

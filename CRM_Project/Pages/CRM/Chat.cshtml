@@ -2,6 +2,7 @@
 @model CRM_Project.Pages.CRM.FeedBackModel
 @{
 }
+
 <style>
     html, body {
         height: 100%;
@@ -182,9 +183,9 @@
         height: 10px;
         background-color: red;
         border-radius: 50%;
-        margin-left: 5px;
+        margin-left: 8px;
+        vertical-align: middle;
     }
-
 
     .user-role-badge {
         display: inline-block;
@@ -321,6 +322,15 @@
             return false;
         });
 
+        // Initialize unread counts
+        contacts.forEach(contact => {
+            contact.unreadCount = messages.filter(msg =>
+                msg.receiverId === currentUser.id &&
+                msg.senderId === contact.id &&
+                !msg.read
+            ).length;
+        });
+
         renderContacts();
     }
 
@@ -349,11 +359,17 @@
                 default: roleClass = 'role-user';
             }
 
+            // Add unread dot if there are unread messages
+            const unreadDot = contact.unreadCount > 0
+                ? '<span class="unread-dot"></span>'
+                : '';
+
             contactElement.innerHTML = `
                 <div class="user-info">
                     <img src="${contact.photo || '/css/image/pfp.jpg'}" class="user-avatar" alt="${contact.Nome}">
                     <div>
                         <strong>${contact.Nome} ${contact.Cognome}</strong>
+                        ${unreadDot}
                         <span class="user-role-badge ${roleClass}">${contact.Ruolo}</span>
                     </div>
                 </div>
@@ -371,7 +387,18 @@
         document.querySelectorAll('.user').forEach(el => el.classList.remove('active'));
         document.getElementById(`contact-${contact.id}`).classList.add('active');
 
+        // Mark messages as read
+        messages.forEach(msg => {
+            if (msg.receiverId === currentUser.id && msg.senderId === contact.id && !msg.read) {
+                msg.read = true;
+            }
+        });
+        saveMessages();
+
+        // Update unread count for this contact
+        contact.unreadCount = 0;
         renderMessages();
+        renderContacts(); // Refresh contacts to remove the unread dot
     }
 
     function loadMessages() {
@@ -447,6 +474,7 @@
         // Clear input and render
         input.value = '';
         renderMessages();
+        renderContacts(); // Refresh contacts to update unread status
     }
 
     function handleKeyPress(event) {
@@ -462,6 +490,12 @@
                 document.getElementById('userList').classList.remove('open');
             }
         });
+
+        // Optional: Add periodic check for new messages
+        setInterval(function() {
+            loadMessages();
+            loadContacts();
+        }, 5000); // Check every 5 seconds
     }
 
     function toggleContacts() {
